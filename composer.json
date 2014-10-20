@@ -1,0 +1,20 @@
+{
+	"name": "quorum/exporter",
+	"description": "Export Data as Spreadsheets",
+	"require-dev": {
+		"donatj/drop": "*",
+		"phpunit/phpunit": "4.*"
+	},
+	"license": "MIT",
+	"authors": [
+		{
+			"name": "Jesse Donat",
+			"email": "donatj@gmail.com"
+		}
+	],
+	"autoload": {
+		"psr-4": {
+			"Quorum\\Exporter\\": "src/"
+		}
+	}
+}

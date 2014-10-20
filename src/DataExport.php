@@ -14,6 +14,9 @@ class DataExport {
 	 */
 	protected $engine;
 
+	/**
+	 * @param \Quorum\Exporter\EngineInterface $engine
+	 */
 	function __construct( EngineInterface $engine ) {
 		$this->engine = $engine;
 	}

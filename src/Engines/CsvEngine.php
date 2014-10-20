@@ -118,4 +118,37 @@ class CsvEngine implements EngineInterface {
 		$this->enclosure = $enclosure;
 	}
 
+	protected function getBom() {
+		$encoding = $this->outputEncoding;
+
+		switch( $encoding ) {
+			case 'UTF-16':
+			case 'UTF-32':
+				$encoding .= $this->isLittleEndian() ? 'LE' : 'BE';
+				break;
+		}
+
+		switch( $encoding ) {
+//			case 'UTF-8':
+//				return "\xEF\xBB\xBF";
+			case 'UTF-16BE':
+				return "\xFE\xFF";
+			case 'UTF-16LE':
+				return "\xFF\xFE";
+			case 'UTF-32BE':
+				return "\0\0\xFE\xFF";
+			case 'UTF-32LE':
+				return "\xFF\xFE\0\0";
+		}
+
+		return '';
+	}
+
+	/**
+	 * @return bool
+	 */
+	protected final function isLittleEndian() {
+		return unpack('S', "\x01\x00")[1] === 1;
+	}
+
 }

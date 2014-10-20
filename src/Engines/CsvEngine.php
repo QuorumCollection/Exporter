@@ -7,18 +7,17 @@ use Quorum\Exporter\Exceptions\ExportException;
 
 class CsvEngine implements EngineInterface {
 
+	const STRATEGY_CONCAT = 'stat-concat';
+	const STRATEGY_ZIP    = 'stat-zip';
 	/**
 	 * @var resource[]
 	 */
 	protected $streams = [ ];
-
 	protected $outputEncoding;
-
 	protected $inputEncoding;
-
 	protected $delimiter;
-
 	protected $enclosure;
+	protected $multiSheetStrategy = self::STRATEGY_CONCAT;
 
 	function __construct( $outputEncoding = 'UTF-16LE', $delimiter = null, $enclosure = '"', $inputEncoding = 'UTF-8' ) {
 		$this->setDelimiter($delimiter);

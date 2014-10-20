@@ -35,6 +35,11 @@ class CsvEngine implements EngineInterface {
 	protected $disableBom = false;
 
 	/**
+	 * @var int
+	 */
+	protected $autoIndex = 1;
+
+	/**
 	 * @var string
 	 */
 	protected $tmpDir, $tmpPrefix = 'csv-export-';
@@ -148,7 +153,7 @@ class CsvEngine implements EngineInterface {
 				$x = 0;
 				foreach( $this->streams as $stream ) {
 					rewind($stream);
-					$zip->addFromString(($x++) . '.csv', stream_get_contents($stream));
+					$zip->addFromString('Sheet' . ($this->autoIndex++) . '.csv', stream_get_contents($stream));
 				}
 
 				$zip->close();

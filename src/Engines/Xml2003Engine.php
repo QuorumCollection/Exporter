@@ -9,6 +9,8 @@ class Xml2003Engine implements EngineInterface {
 
 	protected $WorksheetData = [ ];
 
+	protected $autoIndex = 1;
+
 	public function processSheet( DataSheet $sheet ) {
 		$stream = $sheet->getTmpStream();
 		rewind($stream);
@@ -20,12 +22,10 @@ class Xml2003Engine implements EngineInterface {
 			$data[] = json_decode($buffer, true);
 		}
 
-
 		$this->WorksheetData[] = [
-			'name' => 'bbq' . rand(),
+			'name' => $sheet->getName() ?: 'Sheet' . ($this->autoIndex++),
 			'data' => $data
 		];
-
 
 	}
 
@@ -34,7 +34,7 @@ class Xml2003Engine implements EngineInterface {
 	 */
 	public function outputToStream( $outputStream ) {
 
-		$doc               = new \DOMDocument;
+		$doc = new \DOMDocument;
 //		$doc->formatOutput = true;
 		$doc->appendChild($doc->createProcessingInstruction('mso-application', 'progid="Excel.Sheet"'));
 
@@ -49,10 +49,7 @@ class Xml2003Engine implements EngineInterface {
 		$documentProperties = $doc->createElement('DocumentProperties');
 		$documentProperties = $workbook->appendChild($documentProperties);
 		$documentProperties->setAttribute('xmlns', 'urn:schemas-microsoft-com:office:office');
-//		$documentProperties->appendChild($doc->createElement('Author', 'Jesse Donat'));
-//		$documentProperties->appendChild($doc->createElement('Description', 'Created By XSpreadsheet 1'));
 		$documentProperties->appendChild($doc->createElement('Created', date('c')));
-//		$documentProperties->appendChild($doc->createElement('Version', '11.8132'));
 
 
 		$styles = $doc->createElement('Styles');
@@ -85,16 +82,16 @@ class Xml2003Engine implements EngineInterface {
 			$worksheet = $workbook->appendChild($worksheet);
 			$worksheet->setAttribute('ss:Name', $WData['name']);
 
-			$Table = $doc->createElement('Table');
-			$Table = $worksheet->appendChild($Table);
+			$table = $doc->createElement('Table');
+			$table = $worksheet->appendChild($table);
 
 			if( isset($WData['headers']) && is_array($WData['headers']) ) {
-				$Row = $doc->createElement('Row');
-				$Row = $Table->appendChild($Row);
-				$Row->setAttribute('ss:StyleID', 's21');
+				$row = $doc->createElement('Row');
+				$row = $table->appendChild($row);
+				$row->setAttribute('ss:StyleID', 's21');
 
 				foreach( $WData['headers'] as $header ) {
-					$Cell = $Row->appendChild($doc->createElement('Cell'));
+					$Cell = $row->appendChild($doc->createElement('Cell'));
 					$Data = $Cell->appendChild($doc->createElement('Data'));
 					$Data->setAttribute('ss:Type', 'String');
 					$Data->appendChild($doc->createTextNode($header));
@@ -104,15 +101,15 @@ class Xml2003Engine implements EngineInterface {
 
 			foreach( $WData['data'] as $dataRow ) {
 
-				$Row        = $doc->createElement('Row');
-				$Row        = $Table->appendChild($Row);
+				$row        = $doc->createElement('Row');
+				$row        = $table->appendChild($row);
 				$cell_index = 0;
 				$wasEmpty   = false;
 
 				foreach( $dataRow as $value ) {
 					$newlines = false;
 					if( $this->not_null($value) ) {
-						$Cell = $Row->appendChild($doc->createElement('Cell'));
+						$Cell = $row->appendChild($doc->createElement('Cell'));
 						if( $wasEmpty ) $Cell->setAttribute('ss:Index', $cell_index + 1);
 						$Data = $Cell->appendChild($doc->createElement('Data'));
 						$Data->setAttribute('ss:Type', is_numeric($value) ? 'Number' : 'String');

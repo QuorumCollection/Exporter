@@ -21,6 +21,8 @@ class CsvEngine implements EngineInterface {
 	protected $enclosure;
 
 	function __construct( $outputEncoding = 'UTF-16LE', $delimiter = null, $enclosure = '"', $inputEncoding = 'UTF-8' ) {
+		$this->setDelimiter($delimiter);
+		$this->setEnclosure($enclosure);
 		$this->outputEncoding = $outputEncoding;
 		$this->inputEncoding  = $inputEncoding;
 	}
@@ -35,7 +37,7 @@ class CsvEngine implements EngineInterface {
 			$data = json_decode($buffer, true);
 
 			$mem = fopen('php://memory', 'w+');
-			if( ($length = @fputcsv($mem, $data, "\t")) === false ) {
+			if( ($length = @fputcsv($mem, $data, $this->getDelimiter(), $this->getEnclosure())) === false ) {
 				throw new ExportException('fputcsv failed');
 			}
 			rewind($mem);
@@ -43,11 +45,10 @@ class CsvEngine implements EngineInterface {
 			fclose($mem);
 
 			$line = mb_convert_encoding($line, $this->outputEncoding, $this->inputEncoding);
-			fputs($outputStream, $line, $this->getDelimiter(), $this->getEnclosure());
+			fputs($outputStream, $line);
 		}
 
 		$this->streams[] = $outputStream;
-
 	}
 
 	public function getFinalStreams() {

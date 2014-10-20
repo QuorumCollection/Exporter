@@ -23,8 +23,29 @@ class CsvEngine implements EngineInterface {
 	function __construct( $outputEncoding = 'UTF-16LE', $delimiter = null, $enclosure = '"', $inputEncoding = 'UTF-8' ) {
 		$this->setDelimiter($delimiter);
 		$this->setEnclosure($enclosure);
+		$this->setOutputEncoding($outputEncoding);
+		$this->setInputEncoding($inputEncoding);
+	}
+
+	/**
+	 * @param string $outputEncoding
+	 */
+	protected function setOutputEncoding( $outputEncoding ) {
+		if( !in_array($outputEncoding, mb_list_encodings()) ) {
+			throw new \InvalidArgumentException('Invalid Encoding');
+		}
 		$this->outputEncoding = $outputEncoding;
-		$this->inputEncoding  = $inputEncoding;
+	}
+
+	/**
+	 * @param string $inputEncoding
+	 */
+	protected function setInputEncoding( $inputEncoding ) {
+		if( !in_array($inputEncoding, mb_list_encodings()) ) {
+			throw new \InvalidArgumentException('Invalid Encoding');
+		}
+		$this->inputEncoding = $inputEncoding;
+	}
 	}
 
 	public function processSheet( DataSheet $sheet ) {

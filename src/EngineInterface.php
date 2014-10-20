@@ -7,8 +7,8 @@ interface EngineInterface {
 	public function processSheet( DataSheet $sheet );
 
 	/**
-	 * @return resource[]
+	 * @param resource $outputStream
 	 */
-	public function getFinalStreams();
+	public function outputToStream( $outputStream );
 
 }

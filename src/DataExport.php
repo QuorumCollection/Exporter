@@ -2,8 +2,6 @@
 
 namespace Quorum\Exporter;
 
-use Quorum\Exporter\Engines\EngineInterface;
-
 class DataExport {
 
 	/**
@@ -12,7 +10,7 @@ class DataExport {
 	protected $dataSheets = [ ];
 
 	/**
-	 * @var \Quorum\Exporter\Engines\EngineInterface
+	 * @var \Quorum\Exporter\EngineInterface
 	 */
 	protected $engine;
 
@@ -41,7 +39,6 @@ class DataExport {
 			rewind($stream);
 
 			stream_copy_to_stream($stream, $outputStream);
-
 		}
 	}
 

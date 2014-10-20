@@ -3,6 +3,7 @@
 namespace Quorum\Exporter\Engines;
 
 use Quorum\Exporter\DataSheet;
+use Quorum\Exporter\EngineInterface;
 use Quorum\Exporter\Exceptions\ExportException;
 
 class CsvEngine implements EngineInterface {

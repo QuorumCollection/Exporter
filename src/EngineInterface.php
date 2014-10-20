@@ -1,8 +1,6 @@
 <?php
 
-namespace Quorum\Exporter\Engines;
-
-use Quorum\Exporter\DataSheet;
+namespace Quorum\Exporter;
 
 interface EngineInterface {
 

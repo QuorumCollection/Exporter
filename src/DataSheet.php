@@ -11,18 +11,21 @@ class DataSheet {
 	 */
 	protected $tmpStream;
 
-	function __construct() {
+	/**
+	 * @var string|null
+	 */
+	protected $name;
+
+	function __construct( $name = null ) {
+		$this->name      = $name;
 		$this->tmpStream = fopen("php://temp", "r+");
 	}
 
-	public function addRow( array $row ) {
-		foreach( $row as $col ) {
-			if( !is_scalar($col) ) {
-				throw new InvalidDataTypeException;
-			}
-		}
-
-		fwrite($this->tmpStream, json_encode($row) . "\n");
+	/**
+	 * @return string
+	 */
+	public function getName() {
+		return $this->name;
 	}
 
 	/**
@@ -35,9 +38,22 @@ class DataSheet {
 	}
 
 	/**
+	 * @param array $row
+	 */
+	public function addRow( array $row ) {
+		foreach( $row as $col ) {
+			if( !is_scalar($col) ) {
+				throw new InvalidDataTypeException;
+			}
+		}
+
+		fwrite($this->tmpStream, json_encode($row) . "\n");
+	}
+
+	/**
 	 * @return resource
 	 */
-	public function getTmpStream(){
+	public function getTmpStream() {
 		return $this->tmpStream;
 	}
 

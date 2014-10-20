@@ -14,17 +14,46 @@ class CsvEngine implements EngineInterface {
 	 * @var resource[]
 	 */
 	protected $streams = [ ];
-	protected $outputEncoding;
-	protected $inputEncoding;
-	protected $delimiter;
-	protected $enclosure;
+
+	/**
+	 * @var string
+	 * @var string
+	 */
+	protected $outputEncoding, $inputEncoding;
+
+	/**
+	 * @var string
+	 * @var string
+	 */
+	protected $delimiter, $enclosure;
+
 	protected $multiSheetStrategy = self::STRATEGY_CONCAT;
+
+	/**
+	 * @var bool
+	 */
+	protected $disableBom = false;
+
+	/**
+	 * @var string
+	 */
+	protected $tmpDir, $tmpPrefix = 'csv-export-';
 
 	function __construct( $outputEncoding = 'UTF-16LE', $delimiter = null, $enclosure = '"', $inputEncoding = 'UTF-8' ) {
 		$this->setDelimiter($delimiter);
 		$this->setEnclosure($enclosure);
 		$this->setOutputEncoding($outputEncoding);
 		$this->setInputEncoding($inputEncoding);
+	}
+
+	/**
+	 * @param mixed $enclosure
+	 */
+	public function setEnclosure( $enclosure ) {
+		if( strlen($enclosure) !== 1 ) {
+			throw new \InvalidArgumentException('Enclosure must be exactly one byte');
+		}
+		$this->enclosure = $enclosure;
 	}
 
 	/**
@@ -46,6 +75,29 @@ class CsvEngine implements EngineInterface {
 		}
 		$this->inputEncoding = $inputEncoding;
 	}
+
+	/**
+	 * @param string $tmpDir
+	 */
+	public function setTmpDir( $tmpDir ) {
+		$this->tmpDir = $tmpDir;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getMultiSheetStrategy() {
+		return $this->multiSheetStrategy;
+	}
+
+	/**
+	 * @param string $multiSheetStrategy
+	 */
+	public function setMultiSheetStrategy( $multiSheetStrategy ) {
+		if( !in_array($multiSheetStrategy, [ self::STRATEGY_ZIP, self::STRATEGY_CONCAT ]) ) {
+			throw new \InvalidArgumentException('Invalid MultiSheet Strategy');
+		}
+		$this->multiSheetStrategy = $multiSheetStrategy;
 	}
 
 	public function processSheet( DataSheet $sheet ) {
@@ -72,8 +124,57 @@ class CsvEngine implements EngineInterface {
 		$this->streams[] = $outputStream;
 	}
 
-	public function getFinalStreams() {
-		return $this->streams;
+	/**
+	 * @param resource $outputStream
+	 * @throws \Exception
+	 */
+	public function outputToStream( $outputStream ) {
+
+
+		switch( $this->multiSheetStrategy ) {
+			case self::STRATEGY_ZIP:
+				$tmpDir = rtrim($this->tmpDir ?: sys_get_temp_dir(), '/');
+				if( !is_dir($tmpDir) ) {
+					throw new \RuntimeException("Temporary Directory Not Found");
+				}
+
+				$tmpName = tempnam($tmpDir, $this->tmpPrefix);
+
+				$zip = new \ZipArchive;
+				if( !$zip->open($tmpName, \ZipArchive::CREATE) ) {
+					throw new ExportException('Error creating zip');
+				}
+
+				$x = 0;
+				foreach( $this->streams as $stream ) {
+					rewind($stream);
+					$zip->addFromString(($x++) . '.csv', stream_get_contents($stream));
+				}
+
+				$zip->close();
+
+				$tmpStream = fopen($tmpName, 'r');
+				stream_copy_to_stream($tmpStream, $outputStream);
+				fclose($tmpStream);
+
+				register_shutdown_function(function () use ( $tmpName ) {
+					if( file_exists($tmpName) ) {
+						unlink($tmpName);
+					}
+				});
+
+				break;
+			case self::STRATEGY_CONCAT:
+				fwrite($outputStream, $this->getBom());
+				foreach( $this->streams as $stream ) {
+					rewind($stream);
+					stream_copy_to_stream($stream, $outputStream);
+				}
+
+				break;
+			default:
+				throw new \Exception('Invalid MultiSheet Strategy');
+		}
 	}
 
 	/**
@@ -81,7 +182,7 @@ class CsvEngine implements EngineInterface {
 	 */
 	public function getDelimiter() {
 		if( $this->delimiter === null ) {
-			if( stripos($this->outputEncoding, 'UTF-16') === 0 ) {
+			if( stripos($this->outputEncoding, 'UTF-16') === 0 || stripos($this->outputEncoding, 'UTF-32') === 0 ) {
 				return "\t";
 			} else {
 				return ",";
@@ -108,17 +209,11 @@ class CsvEngine implements EngineInterface {
 		return $this->enclosure;
 	}
 
-	/**
-	 * @param mixed $enclosure
-	 */
-	public function setEnclosure( $enclosure ) {
-		if( strlen($enclosure) !== 1 ) {
-			throw new \InvalidArgumentException('Enclosure must be exactly one byte');
-		}
-		$this->enclosure = $enclosure;
-	}
-
 	protected function getBom() {
+		if( $this->disableBom ) {
+			return '';
+		}
+
 		$encoding = $this->outputEncoding;
 
 		switch( $encoding ) {
@@ -149,6 +244,13 @@ class CsvEngine implements EngineInterface {
 	 */
 	protected final function isLittleEndian() {
 		return unpack('S', "\x01\x00")[1] === 1;
+	}
+
+	/**
+	 * @param bool $disable
+	 */
+	public function disableBom( $disable = true ) {
+		$this->disableBom = $disable;
 	}
 
 }

@@ -25,6 +25,9 @@ class DataSheet {
 		fwrite($this->tmpStream, json_encode($row) . "\n");
 	}
 
+	/**
+	 * @param array|\Iterator $dataSet
+	 */
 	public function addRows( $dataSet ) {
 		foreach( $dataSet as $row ) {
 			$this->addRow($row);

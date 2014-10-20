@@ -28,18 +28,18 @@ class DataExport {
 
 	/**
 	 * @param resource $outputStream
+	 * @param callable $headerCallback
 	 */
-	public function export( $outputStream ) {
+	public function export( $outputStream, callable $headerCallback = null ) {
 		foreach( $this->dataSheets as $dataSheet ) {
 			$this->engine->processSheet($dataSheet);
 		}
 
-		$streams = $this->engine->getFinalStreams();
-		foreach( $streams as $stream ) {
-			rewind($stream);
-
-			stream_copy_to_stream($stream, $outputStream);
+		if($headerCallback) {
+			$headerCallback('');
 		}
+
+		$this->engine->outputToStream($outputStream, $headerCallback);
 	}
 
 }

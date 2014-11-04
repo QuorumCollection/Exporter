@@ -7,7 +7,7 @@ use Quorum\Exporter\EngineInterface;
 
 class Xml2003Engine implements EngineInterface {
 
-	protected $WorksheetData = [ ];
+	protected $worksheetData = [ ];
 
 	protected $autoIndex = 1;
 
@@ -15,16 +15,44 @@ class Xml2003Engine implements EngineInterface {
 		$stream = $sheet->getTmpStream();
 		rewind($stream);
 
-//		$outputStream = fopen("php://temp", "r+");
-
-		$data = [ ];
+//		$data = [ ];
+		$outputStream = fopen("php://temp", "r+");
 		while( ($buffer = fgets($stream)) !== false ) {
-			$data[] = json_decode($buffer, true);
+			$dataRow = json_decode($buffer, true);
+
+			$doc = new \DOMDocument;
+			$row = $doc->createElement('Row');
+			$doc->appendChild($row);
+			$cell_index = 0;
+			$wasEmpty   = false;
+
+			foreach( $dataRow as $value ) {
+				$newlines = false;
+				if( $this->not_null($value) ) {
+					$Cell = $row->appendChild($doc->createElement('Cell'));
+					if( $wasEmpty ) {
+						$Cell->setAttribute('ss:Index', $cell_index + 1);
+					};
+					$Data = $Cell->appendChild($doc->createElement('Data'));
+					$Data->setAttribute('ss:Type', is_numeric($value) ? 'Number' : 'String');
+					$Data->appendChild($doc->createTextNode($value));
+					if( $newlines > 0 ) {
+						$Cell->setAttribute('ss:StyleID', 's22');
+					}
+					$wasEmpty = false;
+				} else {
+					$wasEmpty = true;
+				}
+				$cell_index++;
+			}
+
+			// ALlows you to output without an XML Declaration
+			fwrite($outputStream, $doc->saveXML($doc->documentElement));
 		}
 
-		$this->WorksheetData[] = [
-			'name' => $sheet->getName() ?: 'Sheet' . ($this->autoIndex++),
-			'data' => $data
+		$this->worksheetData[] = [
+			'name'   => $sheet->getName() ?: 'Sheet' . ($this->autoIndex++),
+			'stream' => $outputStream,
 		];
 
 	}
@@ -33,7 +61,40 @@ class Xml2003Engine implements EngineInterface {
 	 * @param resource $outputStream
 	 */
 	public function outputToStream( $outputStream ) {
+		$baseXml = $this->generateBaseXmlDocument();
 
+		$splitDocument = preg_split('%(?:</?Replace_This_Element_With_Worksheet\d+/?>){1,2}%', $baseXml);
+
+		foreach( $this->worksheetData as $index => $sheetData ) {
+			fwrite($outputStream, $splitDocument[$index]);
+			rewind($sheetData['stream']);
+			stream_copy_to_stream($sheetData['stream'], $outputStream);
+		}
+
+		fwrite($outputStream, end($splitDocument));
+	}
+
+
+	private function not_null( $value ) {
+		if( is_array($value) ) {
+			if( sizeof($value) > 0 ) {
+				return true;
+			} else {
+				return false;
+			}
+		} else {
+			if( (is_string($value) || is_int($value)) && ($value != '') && ($value != 'NULL') && (strlen(trim($value)) > 0) ) {
+				return true;
+			} else {
+				return false;
+			}
+		}
+	}
+
+	/**
+	 * @return string
+	 */
+	protected function generateBaseXmlDocument() {
 		$doc = new \DOMDocument;
 //		$doc->formatOutput = true;
 		$doc->appendChild($doc->createProcessingInstruction('mso-application', 'progid="Excel.Sheet"'));
@@ -76,78 +137,37 @@ class Xml2003Engine implements EngineInterface {
 		$align->setAttribute('ss:Vertical', 'Bottom');
 		$align->setAttribute('ss:WrapText', '1');
 
-		foreach( $this->WorksheetData as $WData ) {
+		foreach( $this->worksheetData as $index => $WData ) {
 
 			$worksheet = $doc->createElement('Worksheet');
 			$worksheet = $workbook->appendChild($worksheet);
 			$worksheet->setAttribute('ss:Name', $WData['name']);
 
 			$table = $doc->createElement('Table');
-			$table = $worksheet->appendChild($table);
+			$worksheet->appendChild($table);
 
-			if( isset($WData['headers']) && is_array($WData['headers']) ) {
-				$row = $doc->createElement('Row');
-				$row = $table->appendChild($row);
-				$row->setAttribute('ss:StyleID', 's21');
+			$replaceElement = $doc->createElement('Replace_This_Element_With_Worksheet' . $index);
+			$table->appendChild($replaceElement);
 
-				foreach( $WData['headers'] as $header ) {
-					$Cell = $row->appendChild($doc->createElement('Cell'));
-					$Data = $Cell->appendChild($doc->createElement('Data'));
-					$Data->setAttribute('ss:Type', 'String');
-					$Data->appendChild($doc->createTextNode($header));
 
-				}
-			}
-
-			foreach( $WData['data'] as $dataRow ) {
-
-				$row        = $doc->createElement('Row');
-				$row        = $table->appendChild($row);
-				$cell_index = 0;
-				$wasEmpty   = false;
-
-				foreach( $dataRow as $value ) {
-					$newlines = false;
-					if( $this->not_null($value) ) {
-						$Cell = $row->appendChild($doc->createElement('Cell'));
-						if( $wasEmpty ) $Cell->setAttribute('ss:Index', $cell_index + 1);
-						$Data = $Cell->appendChild($doc->createElement('Data'));
-						$Data->setAttribute('ss:Type', is_numeric($value) ? 'Number' : 'String');
-						$Data->appendChild($doc->createTextNode($value));
-						if( $newlines > 0 ) {
-							$Cell->setAttribute('ss:StyleID', 's22');
-						}
-						$wasEmpty = false;
-					} else {
-						$wasEmpty = true;
-					}
-					$cell_index++;
-				}
-
-			}
+//			if( isset($WData['headers']) && is_array($WData['headers']) ) {
+//				$row = $doc->createElement('Row');
+//				$row = $table->appendChild($row);
+//				$row->setAttribute('ss:StyleID', 's21');
+//
+//				foreach( $WData['headers'] as $header ) {
+//					$Cell = $row->appendChild($doc->createElement('Cell'));
+//					$Data = $Cell->appendChild($doc->createElement('Data'));
+//					$Data->setAttribute('ss:Type', 'String');
+//					$Data->appendChild($doc->createTextNode($header));
+//
+//				}
+//			}
 		}
 
-		fwrite($outputStream, $doc->saveXML());
+		$baseXml = $doc->saveXML();
 
-//		$this->xmlDoc = $this->post_process( $doc->saveXML() );
-
-	}
-
-
-	private function not_null( $value ) {
-		if( is_array($value) ) {
-			if( sizeof($value) > 0 ) {
-				return true;
-			} else {
-				return false;
-			}
-		} else {
-			if( (is_string($value) || is_int($value)) && ($value != '') && ($value != 'NULL') && (strlen(trim($value)) > 0) ) {
-				return true;
-			} else {
-				return false;
-			}
-		}
+		return $baseXml;
 	}
 
 }

@@ -4,7 +4,7 @@ namespace Quorum\Exporter;
 
 use Quorum\Exporter\Exceptions\InvalidDataTypeException;
 
-class DataSheet {
+class DataSheet implements \Iterator {
 
 	/**
 	 * @var resource
@@ -15,6 +15,18 @@ class DataSheet {
 	 * @var string|null
 	 */
 	protected $name;
+	/**
+	 * The row counter.
+	 *
+	 * @var int
+	 */
+	protected $rowIndex = 0;
+	/**
+	 * The current iterator value
+	 *
+	 * @var array|null
+	 */
+	protected $currentValue = null;
 
 	function __construct( $name = null ) {
 		$this->name      = $name;
@@ -51,10 +63,53 @@ class DataSheet {
 	}
 
 	/**
-	 * @return resource
+	 * Return the current value
+	 *
+	 * @return array
 	 */
-	public function getTmpStream() {
-		return $this->tmpStream;
+	public function current() {
+		return $this->currentValue;
 	}
 
+	/**
+	 * Move forward to next element
+	 */
+	public function next() {
+		$string = fgets($this->tmpStream);
+
+		if( $string === false ) {
+			$this->currentValue = null;
+		} else {
+			$this->currentValue = json_decode($string, true);
+			$this->rowIndex++;
+		}
+	}
+
+	/**
+	 * Return the key of the current element
+	 *
+	 * @link http://php.net/manual/en/iterator.key.php
+	 * @return mixed scalar on success, or null on failure.
+	 */
+	public function key() {
+		return $this->rowIndex;
+	}
+
+	/**
+	 * Checks if current position is valid
+	 *
+	 * @return boolean
+	 */
+	public function valid() {
+		return $this->currentValue !== null;
+	}
+
+	/**
+	 * Rewind the Iterator to the first element
+	 */
+	public function rewind() {
+		$this->rowIndex = 0;
+		rewind($this->tmpStream);
+		$this->next();
+	}
 }

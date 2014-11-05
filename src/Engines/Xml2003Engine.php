@@ -12,12 +12,8 @@ class Xml2003Engine implements EngineInterface {
 	protected $autoIndex = 1;
 
 	public function processSheet( DataSheet $sheet ) {
-		$stream = $sheet->getTmpStream();
-		rewind($stream);
-
 		$outputStream = fopen("php://temp", "r+");
-		while( ($buffer = fgets($stream)) !== false ) {
-			$dataRow = json_decode($buffer, true);
+		foreach( $sheet as $dataRow ) {
 
 			$doc = new \DOMDocument;
 			$row = $doc->createElement('Row');
@@ -47,7 +43,9 @@ class Xml2003Engine implements EngineInterface {
 			}
 
 			// ALlows you to output without an XML Declaration
-			fwrite($outputStream, $doc->saveXML($doc->documentElement));
+			$xmlData = $doc->saveXML($doc->documentElement);
+			$xmlData = preg_replace('/\r\n|\r|\n/', '&#13;', $xmlData);
+			fwrite($outputStream, $xmlData);
 		}
 
 		$this->worksheetData[] = [

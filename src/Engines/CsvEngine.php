@@ -106,14 +106,9 @@ class CsvEngine implements EngineInterface {
 	}
 
 	public function processSheet( DataSheet $sheet ) {
-		$stream = $sheet->getTmpStream();
-		rewind($stream);
-
 		$outputStream = fopen("php://temp", "r+");
 
-		while( ($buffer = fgets($stream)) !== false ) {
-			$data = json_decode($buffer, true);
-
+		foreach( $sheet as $data ) {
 			$mem = fopen('php://memory', 'w+');
 			if( ($length = @fputcsv($mem, $data, $this->getDelimiter(), $this->getEnclosure())) === false ) {
 				throw new ExportException('fputcsv failed');

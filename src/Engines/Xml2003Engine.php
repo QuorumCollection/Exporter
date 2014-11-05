@@ -26,19 +26,18 @@ class Xml2003Engine implements EngineInterface {
 			$wasEmpty   = false;
 
 			foreach( $dataRow as $value ) {
-				$newlines = false;
 				if( $this->not_null($value) ) {
-					$Cell = $doc->createElement('Cell');
-					$row->appendChild($Cell);
+					$rowCell = $doc->createElement('Cell');
+					$row->appendChild($rowCell);
 					if( $wasEmpty ) {
-						$Cell->setAttribute('ss:Index', $cell_index + 1);
+						$rowCell->setAttribute('ss:Index', $cell_index + 1);
 					};
-					$Data = $doc->createElement('Data');
-					$Data->setAttribute('ss:Type', is_numeric($value) ? 'Number' : 'String');
-					$Data->appendChild($doc->createTextNode($value));
-					$Cell->appendChild($Data);
-					if( $newlines > 0 ) {
-						$Cell->setAttribute('ss:StyleID', 's22');
+					$cellData = $doc->createElement('Data');
+					$cellData->setAttribute('ss:Type', is_numeric($value) ? 'Number' : 'String');
+					$cellData->appendChild($doc->createTextNode($value));
+					$rowCell->appendChild($cellData);
+					if( stripos($value, "\n") !== false ) {
+						$rowCell->setAttribute('ss:StyleID', 's22');
 					}
 					$wasEmpty = false;
 				} else {

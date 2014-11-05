@@ -15,7 +15,6 @@ class Xml2003Engine implements EngineInterface {
 		$stream = $sheet->getTmpStream();
 		rewind($stream);
 
-//		$data = [ ];
 		$outputStream = fopen("php://temp", "r+");
 		while( ($buffer = fgets($stream)) !== false ) {
 			$dataRow = json_decode($buffer, true);
@@ -29,13 +28,15 @@ class Xml2003Engine implements EngineInterface {
 			foreach( $dataRow as $value ) {
 				$newlines = false;
 				if( $this->not_null($value) ) {
-					$Cell = $row->appendChild($doc->createElement('Cell'));
+					$Cell = $doc->createElement('Cell');
+					$row->appendChild($Cell);
 					if( $wasEmpty ) {
 						$Cell->setAttribute('ss:Index', $cell_index + 1);
 					};
-					$Data = $Cell->appendChild($doc->createElement('Data'));
+					$Data = $doc->createElement('Data');
 					$Data->setAttribute('ss:Type', is_numeric($value) ? 'Number' : 'String');
 					$Data->appendChild($doc->createTextNode($value));
+					$Cell->appendChild($Data);
 					if( $newlines > 0 ) {
 						$Cell->setAttribute('ss:StyleID', 's22');
 					}
@@ -105,12 +106,12 @@ class Xml2003Engine implements EngineInterface {
 		$workbook->setAttribute('xmlns:x', 'urn:schemas-microsoft-com:office:excel');
 		$workbook->setAttribute('xmlns:ss', 'urn:schemas-microsoft-com:office:spreadsheet');
 		$workbook->setAttribute('xmlns:html', 'http://www.w3.org/TR/REC-html40');
-		$workbook = $doc->appendChild($workbook);
+		$doc->appendChild($workbook);
 
 		$documentProperties = $doc->createElement('DocumentProperties');
-		$documentProperties = $workbook->appendChild($documentProperties);
 		$documentProperties->setAttribute('xmlns', 'urn:schemas-microsoft-com:office:office');
 		$documentProperties->appendChild($doc->createElement('Created', date('c')));
+		$workbook->appendChild($documentProperties);
 
 
 		$styles = $doc->createElement('Styles');
@@ -118,29 +119,30 @@ class Xml2003Engine implements EngineInterface {
 
 		//Default
 		$style = $doc->createElement('Style');
-		$style = $styles->appendChild($style);
 		$style->setAttribute('ss:ID', 'Default');
 		$style->setAttribute('ss:Name', 'Normal');
 		$style->appendChild($doc->createElement('Alignment'))->setAttribute('ss:Vertical', 'Bottom');
+		$styles->appendChild($style);
 
 		//Headers
 		$style = $doc->createElement('Style');
-		$style = $styles->appendChild($style);
 		$style->setAttribute('ss:ID', 's21');
 		$style->appendChild($doc->createElement('Font'))->setAttribute('ss:Bold', '1');
+		$styles->appendChild($style);
 
 		//Multiline
 		$style = $doc->createElement('Style');
-		$style = $styles->appendChild($style);
 		$style->setAttribute('ss:ID', 's22');
-		$align = $style->appendChild($doc->createElement('Alignment'));
+		$align = $doc->createElement('Alignment');
+		$style->appendChild($align);
 		$align->setAttribute('ss:Vertical', 'Bottom');
 		$align->setAttribute('ss:WrapText', '1');
+		$styles->appendChild($style);
 
 		foreach( $this->worksheetData as $index => $WData ) {
 
 			$worksheet = $doc->createElement('Worksheet');
-			$worksheet = $workbook->appendChild($worksheet);
+			$workbook->appendChild($worksheet);
 			$worksheet->setAttribute('ss:Name', $WData['name']);
 
 			$table = $doc->createElement('Table');

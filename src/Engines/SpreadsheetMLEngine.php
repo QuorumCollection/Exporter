@@ -5,7 +5,7 @@ namespace Quorum\Exporter\Engines;
 use Quorum\Exporter\DataSheet;
 use Quorum\Exporter\EngineInterface;
 
-class Xml2003Engine implements EngineInterface {
+class SpreadsheetMLEngine implements EngineInterface {
 
 	protected $worksheetData = [ ];
 

@@ -42,7 +42,7 @@ class SpreadsheetMLEngine implements EngineInterface {
 				$cell_index++;
 			}
 
-			// ALlows you to output without an XML Declaration
+			// Allows you to output without an XML Declaration
 			$xmlData = $doc->saveXML($doc->documentElement);
 			$xmlData = preg_replace('/\r\n|\r|\n/', '&#13;', $xmlData);
 			fwrite($outputStream, $xmlData);

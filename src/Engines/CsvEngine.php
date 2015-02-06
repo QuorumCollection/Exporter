@@ -44,6 +44,14 @@ class CsvEngine implements EngineInterface {
 	 */
 	protected $tmpDir, $tmpPrefix = 'csv-export-';
 
+	/**
+	 * @see http://php.net/manual/en/function.mb-list-encodings.php for list of encoding strings.
+	 *
+	 * @param string      $outputEncoding The encoding to output. UTF-16LE is best supported by Excel
+	 * @param string|null $delimiter Character to use as Delimiter. Default varies based on encoding.
+	 * @param string      $enclosure Character to use as Enclosure.
+	 * @param string      $inputEncoding The input encoding to convert *from*.
+	 */
 	function __construct( $outputEncoding = 'UTF-16LE', $delimiter = null, $enclosure = '"', $inputEncoding = 'UTF-8' ) {
 		$this->setDelimiter($delimiter);
 		$this->setEnclosure($enclosure);
@@ -52,7 +60,7 @@ class CsvEngine implements EngineInterface {
 	}
 
 	/**
-	 * @param mixed $enclosure
+	 * @param string $enclosure
 	 */
 	public function setEnclosure( $enclosure ) {
 		if( strlen($enclosure) !== 1 ) {
@@ -105,6 +113,12 @@ class CsvEngine implements EngineInterface {
 		$this->multiSheetStrategy = $multiSheetStrategy;
 	}
 
+	/**
+	 * @param \Quorum\Exporter\DataSheet $sheet
+	 * @return void
+	 *
+	 * @access private
+	 */
 	public function processSheet( DataSheet $sheet ) {
 		$outputStream = fopen("php://temp", "r+");
 
@@ -193,7 +207,7 @@ class CsvEngine implements EngineInterface {
 	}
 
 	/**
-	 * @param mixed $delimiter
+	 * @param string $delimiter Delimiter Character
 	 */
 	public function setDelimiter( $delimiter ) {
 		if( $delimiter !== null && strlen($delimiter) !== 1 ) {

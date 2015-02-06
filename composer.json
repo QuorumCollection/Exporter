@@ -3,7 +3,8 @@
 	"description": "Export Data as Spreadsheets",
 	"require": {
 		"maennchen/zipstream-php": "~0.3.0",
-		"ext-SPL": "*"
+		"ext-SPL": "*",
+		"php": ">=5.4"
 	},
 	"require-dev": {
 		"donatj/drop": "*",

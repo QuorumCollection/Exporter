@@ -5,11 +5,13 @@ namespace Quorum\Exporter\Engines;
 use Quorum\Exporter\DataSheet;
 use Quorum\Exporter\EngineInterface;
 use Quorum\Exporter\Exceptions\ExportException;
+use ZipStream\ZipStream;
 
 class CsvEngine implements EngineInterface {
 
 	const STRATEGY_CONCAT = 'stat-concat';
 	const STRATEGY_ZIP    = 'stat-zip';
+
 	/**
 	 * @var resource[]
 	 */
@@ -144,7 +146,6 @@ class CsvEngine implements EngineInterface {
 	 */
 	public function outputToStream( $outputStream ) {
 
-
 		switch( $this->multiSheetStrategy ) {
 			case self::STRATEGY_ZIP:
 				$tmpDir = rtrim($this->tmpDir ?: sys_get_temp_dir(), '/');
@@ -152,30 +153,18 @@ class CsvEngine implements EngineInterface {
 					throw new \RuntimeException("Temporary Directory Not Found");
 				}
 
-				$tmpName = tempnam($tmpDir, $this->tmpPrefix);
+				$zip = new ZipStream(null, [ ZipStream::OPTION_OUTPUT_STREAM => $outputStream ]);
 
-				$zip = new \ZipArchive;
-				if( !$zip->open($tmpName, \ZipArchive::CREATE) ) {
-					throw new ExportException('Error creating zip');
-				}
-
-				$x = 0;
 				foreach( $this->streams as $stream ) {
 					rewind($stream);
-					$zip->addFromString('Sheet' . ($this->autoIndex++) . '.csv', stream_get_contents($stream));
+					$tmpStream = fopen("php://temp", "r+");
+					fwrite($tmpStream, $this->getBom());
+					stream_copy_to_stream($stream, $tmpStream);
+
+					$zip->addFileFromStream('Sheet' . ($this->autoIndex++) . '.csv', $tmpStream);
 				}
 
-				$zip->close();
-
-				$tmpStream = fopen($tmpName, 'r');
-				stream_copy_to_stream($tmpStream, $outputStream);
-				fclose($tmpStream);
-
-				register_shutdown_function(function () use ( $tmpName ) {
-					if( file_exists($tmpName) ) {
-						unlink($tmpName);
-					}
-				});
+				$zip->finish();
 
 				break;
 			case self::STRATEGY_CONCAT:

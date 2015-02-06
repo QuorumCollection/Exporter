@@ -1,6 +1,10 @@
 {
 	"name": "quorum/exporter",
 	"description": "Export Data as Spreadsheets",
+	"require": {
+		"maennchen/zipstream-php": "~0.3.0",
+		"ext-SPL": "*"
+	},
 	"require-dev": {
 		"donatj/drop": "*",
 		"phpunit/phpunit": "4.*"

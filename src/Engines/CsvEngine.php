@@ -137,7 +137,10 @@ class CsvEngine implements EngineInterface {
 			fputs($outputStream, $line);
 		}
 
-		$this->streams[] = $outputStream;
+		if ( !$name = $sheet->getName() ) {
+			$name = sprintf( "Sheet%d", $this->autoIndex++ );
+		}
+		$this->streams[$name] = $outputStream;
 	}
 
 	/**
@@ -155,13 +158,13 @@ class CsvEngine implements EngineInterface {
 
 				$zip = new ZipStream(null, [ ZipStream::OPTION_OUTPUT_STREAM => $outputStream ]);
 
-				foreach( $this->streams as $stream ) {
+				foreach( $this->streams as $name => $stream ) {
 					rewind($stream);
 					$tmpStream = fopen("php://temp", "r+");
 					fwrite($tmpStream, $this->getBom());
 					stream_copy_to_stream($stream, $tmpStream);
 
-					$zip->addFileFromStream('Sheet' . ($this->autoIndex++) . '.csv', $tmpStream);
+					$zip->addFileFromStream($name . '.csv', $tmpStream);
 				}
 
 				$zip->finish();

@@ -53,10 +53,12 @@ class DataSheet implements \Iterator {
 	 * @param array $row
 	 */
 	public function addRow( array $row ) {
-		foreach( $row as $col ) {
-			if( !is_scalar($col) ) {
+		foreach( $row as &$col ) {
+			if( !is_scalar($col) && !is_null($col) ) {
 				throw new InvalidDataTypeException;
 			}
+
+			$col = (string)$col;
 		}
 
 		fwrite($this->tmpStream, json_encode($row) . "\n");

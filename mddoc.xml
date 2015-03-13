@@ -1,0 +1,33 @@
+<mddoc>
+
+	<docpage target="README.md" autoloader="psr0" autoloader-root="src">
+
+        <section title="Exporter">
+            <text><![CDATA[[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/QuorumCollection/Exporter/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/QuorumCollection/Exporter/?branch=master)
+
+A Streamed Data Export Tool
+
+Supported formats:
+- CSV
+- SpreadsheetML
+- More to come.
+
+More details to come. Early Beta.
+]]></text>
+			<section title="Installing">
+				<text><![CDATA[
+Exporter is available through Packagist via Composer.
+
+```json
+"require": {
+  "quorum/exporter": "dev-master",
+}
+```
+]]></text>
+			</section>
+            <section title="Documentation">
+                <recursivedirectory name="src"/>
+            </section>
+        </section>
+	</docpage>
+</mddoc>

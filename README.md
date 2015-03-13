@@ -32,17 +32,29 @@ Exporter is available through Packagist via Composer.
 
 - ***\Quorum\Exporter\EngineInterface*** `$engine`
 
-
-
-#### Undocumented Method: `DataExport->addSheet($sheet [, $sheetTitle = null])`
-
 ---
 
-#### Method: `DataExport->export($outputStream [, $headerCallback = null])`
+#### Method: `DataExport->addSheet($sheet [, $sheetTitle = null])`
+
+Add a Data Sheet to the export.
 
 ##### Parameters:
 
-- ***resource*** `$outputStream`
+- ***\Quorum\Exporter\DataSheet*** `$sheet` - The DataSheet to add to the export
+- ***null*** | ***string*** `$sheetTitle` - Optional Title to give the data export.
+Most Engines will interpret this as filename (sans file extension).
+If excluded, the name will be left to the engine.
+
+---
+
+#### Method: `DataExport->export([ $outputStream = null [, $headerCallback = null]])`
+
+Trigger the final export process.
+
+##### Parameters:
+
+- ***resource*** | ***null*** `$outputStream` - The stream resource to export to.
+NULL will open a php://output resource.
 - ***callable*** `$headerCallback`
 
 ### Class: DataSheet \[ `\Quorum\Exporter` \]

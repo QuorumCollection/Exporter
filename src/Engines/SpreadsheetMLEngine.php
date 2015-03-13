@@ -127,7 +127,7 @@ class SpreadsheetMLEngine implements EngineInterface {
 		$style->appendChild($doc->createElement('Font'))->setAttribute('ss:Bold', '1');
 		$styles->appendChild($style);
 
-		//Multiline
+		//Multi-line
 		$style = $doc->createElement('Style');
 		$style->setAttribute('ss:ID', 's22');
 		$align = $doc->createElement('Alignment');

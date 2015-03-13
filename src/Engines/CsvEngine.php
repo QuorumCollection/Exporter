@@ -184,7 +184,9 @@ class CsvEngine implements EngineInterface {
 	}
 
 	/**
-	 * @return mixed
+	 * Gets delimiter.  If unset, UTF-16 and UTF-32 default to TAB "\t", everything else to COMMA ","
+	 *
+	 * @return string
 	 */
 	public function getDelimiter() {
 		if( $this->delimiter === null ) {
@@ -199,7 +201,9 @@ class CsvEngine implements EngineInterface {
 	}
 
 	/**
-	 * @param string $delimiter Delimiter Character
+	 * Sets delimiter. Setting to NULL triggers automatic delimiter decision based on recommended encoding rules.
+	 *
+	 * @param string|null $delimiter Delimiter Character. Must be a single byte.
 	 */
 	public function setDelimiter( $delimiter ) {
 		if( $delimiter !== null && strlen($delimiter) !== 1 ) {
@@ -209,7 +213,7 @@ class CsvEngine implements EngineInterface {
 	}
 
 	/**
-	 * @return mixed
+	 * @return string
 	 */
 	public function getEnclosure() {
 		return $this->enclosure;

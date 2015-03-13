@@ -34,7 +34,7 @@ Exporter is available through Packagist via Composer.
 
 
 
-#### haUndocumented Method: `DataExport->addSheet($sheet [, $sheetTitle = null])`
+#### Undocumented Method: `DataExport->addSheet($sheet [, $sheetTitle = null])`
 
 ---
 
@@ -49,7 +49,7 @@ Exporter is available through Packagist via Composer.
 
 
 
-#### haUndocumented Method: `DataSheet->__construct([ $name = null])`
+#### Undocumented Method: `DataSheet->__construct([ $name = null])`
 
 ---
 
@@ -230,7 +230,7 @@ Sets delimiter. Setting to NULL triggers automatic delimiter decision based on r
 
 
 
-#### haUndocumented Method: `SpreadsheetMLEngine->processSheet($sheet)`
+#### Undocumented Method: `SpreadsheetMLEngine->processSheet($sheet)`
 
 ---
 

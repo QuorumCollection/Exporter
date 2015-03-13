@@ -54,7 +54,7 @@ class CsvEngine implements EngineInterface {
 	 * @param string      $enclosure Character to use as Enclosure.
 	 * @param string      $inputEncoding The input encoding to convert *from*.
 	 */
-	function __construct( $outputEncoding = 'UTF-16LE', $delimiter = null, $enclosure = '"', $inputEncoding = 'UTF-8' ) {
+	public function __construct( $outputEncoding = 'UTF-16LE', $delimiter = null, $enclosure = '"', $inputEncoding = 'UTF-8' ) {
 		$this->setDelimiter($delimiter);
 		$this->setEnclosure($enclosure);
 		$this->setOutputEncoding($outputEncoding);

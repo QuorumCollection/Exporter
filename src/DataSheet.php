@@ -28,7 +28,7 @@ class DataSheet implements \Iterator {
 	 */
 	protected $currentValue = null;
 
-	function __construct( $name = null ) {
+	public function __construct( $name = null ) {
 		$this->name      = $name;
 		$this->tmpStream = fopen("php://temp", "r+");
 	}

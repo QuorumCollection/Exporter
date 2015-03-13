@@ -1,6 +1,6 @@
 <mddoc>
 
-	<docpage target="README.md" autoloader="psr0" autoloader-root="src">
+	<docpage target="README.md" autoloader="psr4" autoloader-root-namespace="Quorum\Exporter" autoloader-root="src">
 
         <section title="Exporter">
             <text><![CDATA[[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/QuorumCollection/Exporter/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/QuorumCollection/Exporter/?branch=master)
@@ -26,7 +26,7 @@ Exporter is available through Packagist via Composer.
 ]]></text>
 			</section>
             <section title="Documentation">
-                <recursivedirectory name="src"/>
+                <recursivedirectory name="src/" />
             </section>
         </section>
 	</docpage>

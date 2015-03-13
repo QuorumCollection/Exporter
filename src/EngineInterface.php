@@ -7,13 +7,13 @@ interface EngineInterface {
 	/**
 	 * @param \Quorum\Exporter\DataSheet $sheet
 	 * @return mixed
-	 * @private
+	 * @access private
 	 */
 	public function processSheet( DataSheet $sheet );
 
 	/**
 	 * @param resource $outputStream
-	 * @private
+	 * @access private
 	 */
 	public function outputToStream( $outputStream );
 

@@ -131,24 +131,6 @@ Rewind the Iterator to the first element
 
 ### Class: EngineInterface \[ `\Quorum\Exporter` \]
 
-#### Method: `EngineInterface->processSheet($sheet)`
-
-##### Parameters:
-
-- ***\Quorum\Exporter\DataSheet*** `$sheet`
-
-##### Returns:
-
-- ***mixed***
-
----
-
-#### Method: `EngineInterface->outputToStream($outputStream)`
-
-##### Parameters:
-
-- ***resource*** `$outputStream`
-
 ### Class: CsvEngine \[ `\Quorum\Exporter\Engines` \]
 
 #### Method: `CsvEngine->__construct([ $outputEncoding = 'UTF-16LE' [, $delimiter = null [, $enclosure = '"' [, $inputEncoding = 'UTF-8']]]])`
@@ -241,10 +223,6 @@ Sets delimiter. Setting to NULL triggers automatic delimiter decision based on r
 ### Class: SpreadsheetMLEngine \[ `\Quorum\Exporter\Engines` \]
 
 
-
-#### Undocumented Method: `SpreadsheetMLEngine->processSheet($sheet)`
-
----
 
 #### Method: `SpreadsheetMLEngine->outputToStream($outputStream)`
 

@@ -116,10 +116,7 @@ class CsvEngine implements EngineInterface {
 	}
 
 	/**
-	 * @param \Quorum\Exporter\DataSheet $sheet
-	 * @return void
-	 *
-	 * @access private
+	 * @inheritdoc
 	 */
 	public function processSheet( DataSheet $sheet ) {
 		$outputStream = fopen("php://temp", "r+");
@@ -144,8 +141,7 @@ class CsvEngine implements EngineInterface {
 	}
 
 	/**
-	 * @param resource $outputStream
-	 * @throws \Exception
+	 * @inheritdoc
 	 */
 	public function outputToStream( $outputStream ) {
 

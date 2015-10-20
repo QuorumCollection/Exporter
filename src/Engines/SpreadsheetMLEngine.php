@@ -11,6 +11,9 @@ class SpreadsheetMLEngine implements EngineInterface {
 
 	protected $autoIndex = 1;
 
+	/**
+	 * @inheritdoc
+	 */
 	public function processSheet( DataSheet $sheet ) {
 		$outputStream = fopen("php://temp", "r+");
 		foreach( $sheet as $dataRow ) {
@@ -56,7 +59,7 @@ class SpreadsheetMLEngine implements EngineInterface {
 	}
 
 	/**
-	 * @param resource $outputStream
+	 * @inheritdoc
 	 */
 	public function outputToStream( $outputStream ) {
 		$baseXml = $this->generateBaseXmlDocument();

@@ -15,7 +15,7 @@ class CsvEngine implements EngineInterface {
 	/**
 	 * @var resource[]
 	 */
-	protected $streams = [ ];
+	protected $streams = [];
 
 	/**
 	 * @var string
@@ -134,8 +134,8 @@ class CsvEngine implements EngineInterface {
 			fputs($outputStream, $line);
 		}
 
-		if ( !$name = $sheet->getName() ) {
-			$name = sprintf( "Sheet%d", $this->autoIndex++ );
+		if( !$name = $sheet->getName() ) {
+			$name = sprintf("Sheet%d", $this->autoIndex++);
 		}
 		$this->streams[$name] = $outputStream;
 	}

@@ -7,7 +7,7 @@ class DataExport {
 	/**
 	 * @var DataSheet[]
 	 */
-	protected $dataSheets = [ ];
+	protected $dataSheets = [];
 
 	/**
 	 * @var EngineInterface

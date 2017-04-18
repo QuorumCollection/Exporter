@@ -174,15 +174,13 @@ Rewind the Iterator to the first element
 
 - ***string*** `$multiSheetStrategy`
 
+---
 
+#### Method: `CsvEngine->processSheet($sheet)`
 
 ---
 
 #### Method: `CsvEngine->outputToStream($outputStream)`
-
-##### Parameters:
-
-- ***resource*** `$outputStream`
 
 ---
 
@@ -222,13 +220,11 @@ Sets delimiter. Setting to NULL triggers automatic delimiter decision based on r
 
 ### Class: SpreadsheetMLEngine \[ `\Quorum\Exporter\Engines` \]
 
+#### Method: `SpreadsheetMLEngine->processSheet($sheet)`
 
+---
 
 #### Method: `SpreadsheetMLEngine->outputToStream($outputStream)`
-
-##### Parameters:
-
-- ***resource*** `$outputStream`
 
 ### Class: ExportException \[ `\Quorum\Exporter\Exceptions` \]
 

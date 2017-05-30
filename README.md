@@ -1,6 +1,7 @@
 # Exporter
 
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/QuorumCollection/Exporter/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/QuorumCollection/Exporter/?branch=master)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/QuorumCollection/Exporter/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/QuorumCollection/Exporter)
+
 
 A Streamed Data Export Tool
 
@@ -24,9 +25,13 @@ Exporter is available through Packagist via Composer.
 
 ## Documentation
 
-### Class: DataExport \[ `\Quorum\Exporter` \]
+### Class: \Quorum\Exporter\DataExport
 
-#### Method: `DataExport->__construct($engine)`
+#### Method: DataExport->__construct
+
+```php
+function __construct($engine)
+```
 
 ##### Parameters:
 
@@ -34,7 +39,11 @@ Exporter is available through Packagist via Composer.
 
 ---
 
-#### Method: `DataExport->addSheet($sheet [, $sheetTitle = null])`
+#### Method: DataExport->addSheet
+
+```php
+function addSheet($sheet [, $sheetTitle = null])
+```
 
 Add a Data Sheet to the export.
 
@@ -47,7 +56,11 @@ If excluded, the name will be left to the engine.
 
 ---
 
-#### Method: `DataExport->export([ $outputStream = null [, $headerCallback = null]])`
+#### Method: DataExport->export
+
+```php
+function export([ $outputStream = null [, $headerCallback = null]])
+```
 
 Trigger the final export process.
 
@@ -57,7 +70,7 @@ Trigger the final export process.
 NULL will open a php://output resource.
 - ***callable*** `$headerCallback`
 
-### Class: DataSheet \[ `\Quorum\Exporter` \]
+### Class: \Quorum\Exporter\DataSheet
 
 
 
@@ -65,7 +78,11 @@ NULL will open a php://output resource.
 
 ---
 
-#### Method: `DataSheet->getName()`
+#### Method: DataSheet->getName
+
+```php
+function getName()
+```
 
 ##### Returns:
 
@@ -73,7 +90,11 @@ NULL will open a php://output resource.
 
 ---
 
-#### Method: `DataSheet->addRows($dataSet)`
+#### Method: DataSheet->addRows
+
+```php
+function addRows($dataSet)
+```
 
 ##### Parameters:
 
@@ -81,7 +102,11 @@ NULL will open a php://output resource.
 
 ---
 
-#### Method: `DataSheet->addRow($row)`
+#### Method: DataSheet->addRow
+
+```php
+function addRow($row)
+```
 
 ##### Parameters:
 
@@ -89,7 +114,11 @@ NULL will open a php://output resource.
 
 ---
 
-#### Method: `DataSheet->current()`
+#### Method: DataSheet->current
+
+```php
+function current()
+```
 
 Return the current value
 
@@ -99,13 +128,21 @@ Return the current value
 
 ---
 
-#### Method: `DataSheet->next()`
+#### Method: DataSheet->next
+
+```php
+function next()
+```
 
 Move forward to next element
 
 ---
 
-#### Method: `DataSheet->key()`
+#### Method: DataSheet->key
+
+```php
+function key()
+```
 
 Return the key of the current element
 
@@ -115,7 +152,11 @@ Return the key of the current element
 
 ---
 
-#### Method: `DataSheet->valid()`
+#### Method: DataSheet->valid
+
+```php
+function valid()
+```
 
 Checks if current position is valid
 
@@ -125,15 +166,33 @@ Checks if current position is valid
 
 ---
 
-#### Method: `DataSheet->rewind()`
+#### Method: DataSheet->rewind
+
+```php
+function rewind()
+```
 
 Rewind the Iterator to the first element
 
-### Class: EngineInterface \[ `\Quorum\Exporter` \]
+### Class: \Quorum\Exporter\EngineInterface
 
-### Class: CsvEngine \[ `\Quorum\Exporter\Engines` \]
+### Class: \Quorum\Exporter\Engines\CsvEngine
 
-#### Method: `CsvEngine->__construct([ $outputEncoding = 'UTF-16LE' [, $delimiter = null [, $enclosure = '"' [, $inputEncoding = 'UTF-8']]]])`
+```php
+<?php
+namespace Quorum\Exporter\Engines;
+
+class CsvEngine {
+	const STRATEGY_CONCAT = 'stat-concat';
+	const STRATEGY_ZIP = 'stat-zip';
+}
+```
+
+#### Method: CsvEngine->__construct
+
+```php
+function __construct([ $outputEncoding = 'UTF-16LE' [, $delimiter = null [, $enclosure = '"' [, $inputEncoding = 'UTF-8']]]])
+```
 
 ##### Parameters:
 
@@ -144,7 +203,11 @@ Rewind the Iterator to the first element
 
 ---
 
-#### Method: `CsvEngine->setEnclosure($enclosure)`
+#### Method: CsvEngine->setEnclosure
+
+```php
+function setEnclosure($enclosure)
+```
 
 ##### Parameters:
 
@@ -152,7 +215,11 @@ Rewind the Iterator to the first element
 
 ---
 
-#### Method: `CsvEngine->setTmpDir($tmpDir)`
+#### Method: CsvEngine->setTmpDir
+
+```php
+function setTmpDir($tmpDir)
+```
 
 ##### Parameters:
 
@@ -160,7 +227,11 @@ Rewind the Iterator to the first element
 
 ---
 
-#### Method: `CsvEngine->getMultiSheetStrategy()`
+#### Method: CsvEngine->getMultiSheetStrategy
+
+```php
+function getMultiSheetStrategy()
+```
 
 ##### Returns:
 
@@ -168,7 +239,11 @@ Rewind the Iterator to the first element
 
 ---
 
-#### Method: `CsvEngine->setMultiSheetStrategy($multiSheetStrategy)`
+#### Method: CsvEngine->setMultiSheetStrategy
+
+```php
+function setMultiSheetStrategy($multiSheetStrategy)
+```
 
 ##### Parameters:
 
@@ -176,15 +251,27 @@ Rewind the Iterator to the first element
 
 ---
 
-#### Method: `CsvEngine->processSheet($sheet)`
+#### Method: CsvEngine->processSheet
+
+```php
+function processSheet($sheet)
+```
 
 ---
 
-#### Method: `CsvEngine->outputToStream($outputStream)`
+#### Method: CsvEngine->outputToStream
+
+```php
+function outputToStream($outputStream)
+```
 
 ---
 
-#### Method: `CsvEngine->getDelimiter()`
+#### Method: CsvEngine->getDelimiter
+
+```php
+function getDelimiter()
+```
 
 Gets delimiter.  If unset, UTF-16 and UTF-32 default to TAB "\t", everything else to COMMA ","
 
@@ -194,7 +281,11 @@ Gets delimiter.  If unset, UTF-16 and UTF-32 default to TAB "\t", everything els
 
 ---
 
-#### Method: `CsvEngine->setDelimiter($delimiter)`
+#### Method: CsvEngine->setDelimiter
+
+```php
+function setDelimiter($delimiter)
+```
 
 Sets delimiter. Setting to NULL triggers automatic delimiter decision based on recommended encoding rules.
 
@@ -204,7 +295,11 @@ Sets delimiter. Setting to NULL triggers automatic delimiter decision based on r
 
 ---
 
-#### Method: `CsvEngine->getEnclosure()`
+#### Method: CsvEngine->getEnclosure
+
+```php
+function getEnclosure()
+```
 
 ##### Returns:
 
@@ -212,20 +307,34 @@ Sets delimiter. Setting to NULL triggers automatic delimiter decision based on r
 
 ---
 
-#### Method: `CsvEngine->disableBom([ $disable = true])`
+#### Method: CsvEngine->disableBom
+
+```php
+function disableBom([ $disable = true])
+```
 
 ##### Parameters:
 
 - ***bool*** `$disable`
 
-### Class: SpreadsheetMLEngine \[ `\Quorum\Exporter\Engines` \]
+### Class: \Quorum\Exporter\Engines\SpreadsheetMLEngine
 
-#### Method: `SpreadsheetMLEngine->processSheet($sheet)`
+#### Method: SpreadsheetMLEngine->processSheet
+
+```php
+function processSheet($sheet)
+```
 
 ---
 
-#### Method: `SpreadsheetMLEngine->outputToStream($outputStream)`
+#### Method: SpreadsheetMLEngine->outputToStream
 
-### Class: ExportException \[ `\Quorum\Exporter\Exceptions` \]
+```php
+function outputToStream($outputStream)
+```
 
-### Class: InvalidDataTypeException \[ `\Quorum\Exporter\Exceptions` \]
+### Class: \Quorum\Exporter\Exceptions\ExportException
+
+### Class: \Quorum\Exporter\Exceptions\InvalidDataTypeException
+
+### Class: \Quorum\Exporter\Exceptions\WritableException

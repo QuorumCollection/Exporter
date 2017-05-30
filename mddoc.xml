@@ -3,8 +3,8 @@
 	<docpage target="README.md" autoloader="psr4" autoloader-root-namespace="Quorum\Exporter" autoloader-root="src">
 
         <section title="Exporter">
-            <text><![CDATA[[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/QuorumCollection/Exporter/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/QuorumCollection/Exporter/?branch=master)
-
+			<badge-scrutinizer type="quality" name="QuorumCollection/Exporter" />
+            <text><![CDATA[
 A Streamed Data Export Tool
 
 Supported formats:

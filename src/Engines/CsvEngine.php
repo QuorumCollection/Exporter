@@ -106,7 +106,14 @@ class CsvEngine implements EngineInterface {
 	}
 
 	/**
-	 * @param string $multiSheetStrategy
+	 * Set the strategy for allowing multiple sheets.
+	 *
+	 * Supported strategies are CsvEngine::STRATEGY_ZIP and CsvEngine::STRATEGY_CONCAT
+	 *
+	 * - CsvEngine::STRATEGY_ZIP will output a single zipfile containing every sheet as a seperate CSV file.
+	 * - CsvEngine::STRATEGY_CONCAT will output a single CSV file with every sheet one after the next.
+	 *
+	 * @param string $multiSheetStrategy Use the constant CsvEngine::STRATEGY_ZIP or CsvEngine::STRATEGY_CONCAT
 	 */
 	public function setMultiSheetStrategy( $multiSheetStrategy ) {
 		if( !in_array($multiSheetStrategy, [ self::STRATEGY_ZIP, self::STRATEGY_CONCAT ]) ) {
@@ -230,8 +237,8 @@ class CsvEngine implements EngineInterface {
 		}
 
 		switch( $encoding ) {
-//			case 'UTF-8':
-//				return "\xEF\xBB\xBF";
+			//			case 'UTF-8':
+			//				return "\xEF\xBB\xBF";
 			case 'UTF-16BE':
 				return "\xFE\xFF";
 			case 'UTF-16LE':

@@ -192,18 +192,25 @@ namespace Quorum\Exporter\Engines;
 class CsvEngine {
 	const STRATEGY_CONCAT = 'stat-concat';
 	const STRATEGY_ZIP = 'stat-zip';
+	const UTF8 = 'UTF-8';
+	const UTF16 = 'UTF-16';
+	const UTF16BE = 'UTF-16BE';
+	const UTF16LE = 'UTF-16LE';
+	const UTF32 = 'UTF-32';
+	const UTF32BE = 'UTF-32BE';
+	const UTF32LE = 'UTF-32LE';
 }
 ```
 
 #### Method: CsvEngine->__construct
 
 ```php
-function __construct([ $outputEncoding = 'UTF-16LE' [, $delimiter = null [, $enclosure = '"' [, $inputEncoding = 'UTF-8']]]])
+function __construct([ $outputEncoding = self::UTF16LE [, $delimiter = null [, $enclosure = '"' [, $inputEncoding = self::UTF8]]]])
 ```
 
 ##### Parameters:
 
-- ***string*** `$outputEncoding` - The encoding to output. UTF-16LE is best supported by Excel
+- ***string*** `$outputEncoding` - The encoding to output. Defaults to UTF-16LE as it is by far the best supported by Excel
 - ***string*** | ***null*** `$delimiter` - Character to use as Delimiter. Default varies based on encoding.
 - ***string*** `$enclosure` - Character to use as Enclosure.
 - ***string*** `$inputEncoding` - The input encoding to convert *from*.
@@ -253,14 +260,14 @@ function setMultiSheetStrategy($multiSheetStrategy)
 ```
 
 Set the strategy for allowing multiple sheets.  
-Supported strategies are CsvEngine::STRATEGY_ZIP and CsvEngine::STRATEGY_CONCAT  
+Supported strategies are `CsvEngine::STRATEGY_ZIP` and `CsvEngine::STRATEGY_CONCAT`  
   
-- CsvEngine::STRATEGY_ZIP will output a single zipfile containing every sheet as a seperate CSV file.  
-- CsvEngine::STRATEGY_CONCAT will output a single CSV file with every sheet one after the next.
+- `CsvEngine::STRATEGY_ZIP` will output a single zipfile containing every sheet as a seperate CSV file.  
+- `CsvEngine::STRATEGY_CONCAT` will output a single CSV file with every sheet one after the next.
 
 ##### Parameters:
 
-- ***string*** `$multiSheetStrategy` - Use the constant CsvEngine::STRATEGY_ZIP or CsvEngine::STRATEGY_CONCAT
+- ***string*** `$multiSheetStrategy` - Use the constant `CsvEngine::STRATEGY_ZIP` or `CsvEngine::STRATEGY_CONCAT`
 
 ---
 

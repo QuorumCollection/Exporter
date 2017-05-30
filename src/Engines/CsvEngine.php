@@ -12,6 +12,16 @@ class CsvEngine implements EngineInterface {
 	const STRATEGY_CONCAT = 'stat-concat';
 	const STRATEGY_ZIP    = 'stat-zip';
 
+	const UTF8 = 'UTF-8';
+
+	const UTF16   = 'UTF-16';
+	const UTF16BE = 'UTF-16BE';
+	const UTF16LE = 'UTF-16LE';
+
+	const UTF32   = 'UTF-32';
+	const UTF32BE = 'UTF-32BE';
+	const UTF32LE = 'UTF-32LE';
+
 	/**
 	 * @var resource[]
 	 */
@@ -49,12 +59,12 @@ class CsvEngine implements EngineInterface {
 	/**
 	 * @see http://php.net/manual/en/function.mb-list-encodings.php for list of encoding strings.
 	 *
-	 * @param string      $outputEncoding The encoding to output. UTF-16LE is best supported by Excel
+	 * @param string      $outputEncoding The encoding to output. Defaults to UTF-16LE as it is by far the best supported by Excel
 	 * @param string|null $delimiter Character to use as Delimiter. Default varies based on encoding.
 	 * @param string      $enclosure Character to use as Enclosure.
 	 * @param string      $inputEncoding The input encoding to convert *from*.
 	 */
-	public function __construct( $outputEncoding = 'UTF-16LE', $delimiter = null, $enclosure = '"', $inputEncoding = 'UTF-8' ) {
+	public function __construct( $outputEncoding = self::UTF16LE, $delimiter = null, $enclosure = '"', $inputEncoding = self::UTF8 ) {
 		$this->setDelimiter($delimiter);
 		$this->setEnclosure($enclosure);
 		$this->setOutputEncoding($outputEncoding);
@@ -108,12 +118,12 @@ class CsvEngine implements EngineInterface {
 	/**
 	 * Set the strategy for allowing multiple sheets.
 	 *
-	 * Supported strategies are CsvEngine::STRATEGY_ZIP and CsvEngine::STRATEGY_CONCAT
+	 * Supported strategies are `CsvEngine::STRATEGY_ZIP` and `CsvEngine::STRATEGY_CONCAT`
 	 *
-	 * - CsvEngine::STRATEGY_ZIP will output a single zipfile containing every sheet as a seperate CSV file.
-	 * - CsvEngine::STRATEGY_CONCAT will output a single CSV file with every sheet one after the next.
+	 * - `CsvEngine::STRATEGY_ZIP` will output a single zipfile containing every sheet as a seperate CSV file.
+	 * - `CsvEngine::STRATEGY_CONCAT` will output a single CSV file with every sheet one after the next.
 	 *
-	 * @param string $multiSheetStrategy Use the constant CsvEngine::STRATEGY_ZIP or CsvEngine::STRATEGY_CONCAT
+	 * @param string $multiSheetStrategy Use the constant `CsvEngine::STRATEGY_ZIP` or `CsvEngine::STRATEGY_CONCAT`
 	 */
 	public function setMultiSheetStrategy( $multiSheetStrategy ) {
 		if( !in_array($multiSheetStrategy, [ self::STRATEGY_ZIP, self::STRATEGY_CONCAT ]) ) {
@@ -193,7 +203,7 @@ class CsvEngine implements EngineInterface {
 	 */
 	public function getDelimiter() {
 		if( $this->delimiter === null ) {
-			if( stripos($this->outputEncoding, 'UTF-16') === 0 || stripos($this->outputEncoding, 'UTF-32') === 0 ) {
+			if( stripos($this->outputEncoding, self::UTF16) === 0 || stripos($this->outputEncoding, self::UTF32) === 0 ) {
 				return "\t";
 			} else {
 				return ",";
@@ -230,22 +240,23 @@ class CsvEngine implements EngineInterface {
 		$encoding = $this->outputEncoding;
 
 		switch( $encoding ) {
-			case 'UTF-16':
-			case 'UTF-32':
+			case self::UTF16:
+			case self::UTF32:
 				$encoding .= $this->isLittleEndian() ? 'LE' : 'BE';
 				break;
 		}
 
 		switch( $encoding ) {
-			//			case 'UTF-8':
-			//				return "\xEF\xBB\xBF";
-			case 'UTF-16BE':
+			// commented out for the time being. There's almost NO case where you would want a UTF-8 BOM
+			//case 'UTF-8':
+			//	return "\xEF\xBB\xBF";
+			case self::UTF16BE:
 				return "\xFE\xFF";
-			case 'UTF-16LE':
+			case self::UTF16LE:
 				return "\xFF\xFE";
-			case 'UTF-32BE':
+			case self::UTF32BE:
 				return "\0\0\xFE\xFF";
-			case 'UTF-32LE':
+			case self::UTF32LE:
 				return "\xFF\xFE\0\0";
 		}
 

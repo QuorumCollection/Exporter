@@ -62,7 +62,7 @@ class CsvEngine implements EngineInterface {
 	 * @param string      $outputEncoding The encoding to output. Defaults to UTF-16LE as it is by far the best supported by Excel
 	 * @param string|null $delimiter Character to use as Delimiter. Default varies based on encoding.
 	 * @param string      $enclosure Character to use as Enclosure.
-	 * @param string      $inputEncoding The input encoding to convert *from*.
+	 * @param string      $inputEncoding The encoding of the input going into the CSVs.
 	 */
 	public function __construct( $outputEncoding = self::UTF16LE, $delimiter = null, $enclosure = '"', $inputEncoding = self::UTF8 ) {
 		$this->setDelimiter($delimiter);

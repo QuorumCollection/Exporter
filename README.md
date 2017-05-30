@@ -213,7 +213,7 @@ function __construct([ $outputEncoding = self::UTF16LE [, $delimiter = null [, $
 - ***string*** `$outputEncoding` - The encoding to output. Defaults to UTF-16LE as it is by far the best supported by Excel
 - ***string*** | ***null*** `$delimiter` - Character to use as Delimiter. Default varies based on encoding.
 - ***string*** `$enclosure` - Character to use as Enclosure.
-- ***string*** `$inputEncoding` - The input encoding to convert *from*.
+- ***string*** `$inputEncoding` - The encoding of the input going into the CSVs.
 
 ---
 

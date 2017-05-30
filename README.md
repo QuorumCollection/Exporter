@@ -13,6 +13,13 @@ Supported formats:
 More details to come. Early Beta.
 
 
+## Requirements
+
+- **maennchen/zipstream-php**: ~0.3.0
+- **ext-SPL**: *
+- **ext-mbstring**: *
+- **php**: >=5.4
+
 ## Installing
 
 Exporter is available through Packagist via Composer.

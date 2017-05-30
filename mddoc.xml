@@ -14,6 +14,9 @@ Supported formats:
 
 More details to come. Early Beta.
 ]]></text>
+			<section title="Requirements">
+				<composer-requires />
+			</section>
 			<section title="Installing">
 				<text><![CDATA[
 Exporter is available through Packagist via Composer.

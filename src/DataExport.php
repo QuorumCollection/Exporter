@@ -2,6 +2,8 @@
 
 namespace Quorum\Exporter;
 
+use Quorum\Exporter\Exceptions\WritableException;
+
 class DataExport {
 
 	/**
@@ -47,6 +49,10 @@ class DataExport {
 	public function export( $outputStream = null, callable $headerCallback = null ) {
 		if( is_null($outputStream) ) {
 			$outputStream = fopen('php://output', 'w');
+		}
+
+		if(!is_resource($outputStream)) {
+			throw new WritableException('expected resource, got ' . gettype($outputStream));
 		}
 
 		foreach( $this->dataSheets as $dataSheet ) {

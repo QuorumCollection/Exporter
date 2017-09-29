@@ -3,7 +3,11 @@
 	<docpage target="README.md" autoloader="psr4" autoloader-root-namespace="Quorum\Exporter" autoloader-root="src">
 
         <section title="Exporter">
+			<badge-poser type="version" />
+			<badge-poser type="downloads" />
+			<badge-poser type="license" />
 			<badge-scrutinizer type="quality" name="QuorumCollection/Exporter" />
+			<badge-scrutinizer type="build-status" name="QuorumCollection/Exporter" />
             <text><![CDATA[
 A Streamed Data Export Tool
 
@@ -18,15 +22,7 @@ More details to come. Early Beta.
 				<composer-requires />
 			</section>
 			<section title="Installing">
-				<text><![CDATA[
-Exporter is available through Packagist via Composer.
-
-```json
-"require": {
-  "quorum/exporter": "dev-master",
-}
-```
-]]></text>
+				<composer-install/>
 			</section>
             <section title="Documentation">
                 <recursivedirectory name="src/" />

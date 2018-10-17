@@ -44,14 +44,13 @@ class DataExport {
 	 *
 	 * @param resource|null $outputStream The stream resource to export to.
 	 * NULL will open a php://output resource.
-	 * @param callable      $headerCallback
 	 */
-	public function export( $outputStream = null, callable $headerCallback = null ) {
+	public function export( $outputStream = null ) {
 		if( is_null($outputStream) ) {
 			$outputStream = fopen('php://output', 'w');
 		}
 
-		if(!is_resource($outputStream)) {
+		if( !is_resource($outputStream) ) {
 			throw new WritableException('expected resource, got ' . gettype($outputStream));
 		}
 
@@ -59,10 +58,6 @@ class DataExport {
 			$this->engine->processSheet($dataSheet);
 		}
 
-		if( $headerCallback ) {
-			$headerCallback('');
-		}
-
-		$this->engine->outputToStream($outputStream, $headerCallback);
+		$this->engine->outputToStream($outputStream);
 	}
 }

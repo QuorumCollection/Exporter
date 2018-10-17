@@ -10,11 +10,10 @@
 A Streamed Data Export Tool
 
 Supported formats:
-- CSV
-- SpreadsheetML
+- CSV / TSV
+- SpreadsheetML "Excel 2004 XML Spreadsheet"
 - More to come.
 
-More details to come. Early Beta.
 
 
 ## Requirements

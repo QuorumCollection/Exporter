@@ -211,6 +211,13 @@ class CsvEngine {
 function __construct([ $outputEncoding = self::UTF16LE [, $delimiter = null [, $enclosure = '"' [, $inputEncoding = self::UTF8]]]])
 ```
 
+The default and highly recommended export format for CSV tab delimited UTF-16LE with leading Byte Order Mark.  
+While this may seem like an odd choice, the reason for this is cross platform Microsoft Excel compatibility.  
+
+##### You can read more on the topic here
+
+- https://donatstudios.com/CSV-An-Encoding-Nightmare
+
 ##### Parameters:
 
 - ***string*** `$outputEncoding` - The encoding to output. Defaults to UTF-16LE as it is by far the best supported by Excel

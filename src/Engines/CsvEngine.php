@@ -57,6 +57,13 @@ class CsvEngine implements EngineInterface {
 	protected $tmpDir, $tmpPrefix = 'csv-export-';
 
 	/**
+	 * The default and highly recommended export format for CSV tab delimited UTF-16LE with leading Byte Order Mark.
+	 * While this may seem like an odd choice, the reason for this is cross platform Microsoft Excel compatibility.
+	 *
+	 * You can read more on the topic here:
+	 *
+	 * - https://donatstudios.com/CSV-An-Encoding-Nightmare
+	 *
 	 * @see http://php.net/manual/en/function.mb-list-encodings.php for list of encoding strings.
 	 *
 	 * @param string      $outputEncoding The encoding to output. Defaults to UTF-16LE as it is by far the best supported by Excel

@@ -214,9 +214,9 @@ class CsvEngine implements EngineInterface {
 		if( $this->delimiter === null ) {
 			if( stripos($this->outputEncoding, self::UTF16) === 0 || stripos($this->outputEncoding, self::UTF32) === 0 ) {
 				return "\t";
-			} else {
-				return ",";
 			}
+
+			return ",";
 		}
 
 		return $this->delimiter;
@@ -275,7 +275,7 @@ class CsvEngine implements EngineInterface {
 	/**
 	 * @return bool
 	 */
-	protected final function isLittleEndian() {
+	final protected function isLittleEndian() {
 		return unpack('S', "\x01\x00")[1] === 1;
 	}
 

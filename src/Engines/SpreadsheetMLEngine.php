@@ -7,7 +7,7 @@ use Quorum\Exporter\EngineInterface;
 
 class SpreadsheetMLEngine implements EngineInterface {
 
-	protected $worksheetData = [ ];
+	protected $worksheetData = [];
 
 	protected $autoIndex = 1;
 
@@ -30,7 +30,7 @@ class SpreadsheetMLEngine implements EngineInterface {
 					$row->appendChild($rowCell);
 					if( $wasEmpty ) {
 						$rowCell->setAttribute('ss:Index', $cell_index + 1);
-					};
+					}
 					$cellData = $doc->createElement('Data');
 					$cellData->setAttribute('ss:Type', is_numeric($value) ? 'Number' : 'String');
 					$cellData->appendChild($doc->createTextNode($value));
@@ -55,7 +55,6 @@ class SpreadsheetMLEngine implements EngineInterface {
 			'name'   => $sheet->getName() ?: 'Sheet' . ($this->autoIndex++),
 			'stream' => $outputStream,
 		];
-
 	}
 
 	/**
@@ -75,21 +74,19 @@ class SpreadsheetMLEngine implements EngineInterface {
 		fwrite($outputStream, end($splitDocument));
 	}
 
-
 	private function not_null( $value ) {
 		if( is_array($value) ) {
 			if( sizeof($value) > 0 ) {
 				return true;
-			} else {
-				return false;
 			}
-		} else {
-			if( (is_string($value) || is_int($value)) && ($value != '') && ($value != 'NULL') && (strlen(trim($value)) > 0) ) {
-				return true;
-			} else {
-				return false;
-			}
+
+			return false;
 		}
+		if( (is_string($value) || is_int($value)) && ($value != '') && ($value != 'NULL') && (strlen(trim($value)) > 0) ) {
+			return true;
+		}
+
+		return false;
 	}
 
 	/**
@@ -112,7 +109,6 @@ class SpreadsheetMLEngine implements EngineInterface {
 		$documentProperties->setAttribute('xmlns', 'urn:schemas-microsoft-com:office:office');
 		$documentProperties->appendChild($doc->createElement('Created', date('c')));
 		$workbook->appendChild($documentProperties);
-
 
 		$styles = $doc->createElement('Styles');
 		$styles = $workbook->appendChild($styles);
@@ -167,9 +163,7 @@ class SpreadsheetMLEngine implements EngineInterface {
 //			}
 		}
 
-		$baseXml = $doc->saveXML();
-
-		return $baseXml;
+		return $doc->saveXML();
 	}
 
 }

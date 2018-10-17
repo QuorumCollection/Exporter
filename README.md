@@ -22,6 +22,8 @@ More details to come. Early Beta.
 - **maennchen/zipstream-php**: ~0.3.0
 - **ext-SPL**: *
 - **ext-mbstring**: *
+- **ext-dom**: *
+- **ext-json**: *
 - **php**: >=5.4
 
 ## Installing
@@ -68,7 +70,7 @@ If excluded, the name will be left to the engine.
 #### Method: DataExport->export
 
 ```php
-function export([ $outputStream = null [, $headerCallback = null]])
+function export([ $outputStream = null])
 ```
 
 Trigger the final export process.
@@ -77,7 +79,6 @@ Trigger the final export process.
 
 - ***resource*** | ***null*** `$outputStream` - The stream resource to export to.
 NULL will open a php://output resource.
-- ***callable*** `$headerCallback`
 
 ### Class: \Quorum\Exporter\DataSheet
 
@@ -271,21 +272,9 @@ Supported strategies are `CsvEngine::STRATEGY_ZIP` and `CsvEngine::STRATEGY_CONC
 
 - ***string*** `$multiSheetStrategy` - Use the constant `CsvEngine::STRATEGY_ZIP` or `CsvEngine::STRATEGY_CONCAT`
 
----
 
-#### Method: CsvEngine->processSheet
 
-```php
-function processSheet($sheet)
-```
 
----
-
-#### Method: CsvEngine->outputToStream
-
-```php
-function outputToStream($outputStream)
-```
 
 ---
 
@@ -341,22 +330,10 @@ function disableBom([ $disable = true])
 
 ### Class: \Quorum\Exporter\Engines\SpreadsheetMLEngine
 
-#### Method: SpreadsheetMLEngine->processSheet
-
-```php
-function processSheet($sheet)
-```
-
----
-
-#### Method: SpreadsheetMLEngine->outputToStream
-
-```php
-function outputToStream($outputStream)
-```
-
 ### Class: \Quorum\Exporter\Exceptions\ExportException
 
 ### Class: \Quorum\Exporter\Exceptions\InvalidDataTypeException
+
+### Class: \Quorum\Exporter\Exceptions\OutputException
 
 ### Class: \Quorum\Exporter\Exceptions\WritableException

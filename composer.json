@@ -5,6 +5,8 @@
 		"maennchen/zipstream-php": "~0.3.0",
 		"ext-SPL": "*",
 		"ext-mbstring": "*",
+		"ext-dom": "*",
+		"ext-json": "*",
 		"php": ">=5.4"
 	},
 	"require-dev": {

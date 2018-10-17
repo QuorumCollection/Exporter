@@ -5,6 +5,7 @@ namespace Quorum\Exporter\Engines;
 use Quorum\Exporter\DataSheet;
 use Quorum\Exporter\EngineInterface;
 use Quorum\Exporter\Exceptions\ExportException;
+use Quorum\Exporter\Exceptions\OutputException;
 use ZipStream\ZipStream;
 
 class CsvEngine implements EngineInterface {
@@ -166,6 +167,7 @@ class CsvEngine implements EngineInterface {
 
 	/**
 	 * @inheritdoc
+	 * @throws OutputException
 	 */
 	public function outputToStream( $outputStream ) {
 
@@ -189,7 +191,7 @@ class CsvEngine implements EngineInterface {
 
 				$zip->finish();
 
-				break;
+				return;
 			case self::STRATEGY_CONCAT:
 				fwrite($outputStream, $this->getBom());
 				foreach( $this->streams as $stream ) {
@@ -197,10 +199,10 @@ class CsvEngine implements EngineInterface {
 					stream_copy_to_stream($stream, $outputStream);
 				}
 
-				break;
-			default:
-				throw new \Exception('Invalid MultiSheet Strategy');
+				return;
 		}
+
+		throw new OutputException('Unsupported MultiSheet Strategy');
 	}
 
 	/**

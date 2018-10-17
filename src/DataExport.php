@@ -17,7 +17,9 @@ class DataExport {
 	protected $engine;
 
 	/**
-	 * @param EngineInterface $engine
+	 * DataExport is the object used to orchestrate the export process regardless of export format.
+	 *
+	 * @param \Quorum\Exporter\EngineInterface $engine The engine by which to export the data sheets.
 	 */
 	public function __construct( EngineInterface $engine ) {
 		$this->engine = $engine;
@@ -27,7 +29,7 @@ class DataExport {
 	 * Add a Data Sheet to the export.
 	 *
 	 * @param DataSheet   $sheet The DataSheet to add to the export
-	 * @param null|string $sheetTitle Optional Title to give the data export.
+	 * @param string|null $sheetTitle Optional Title to give the data export.
 	 * Most Engines will interpret this as filename (sans file extension).
 	 * If excluded, the name will be left to the engine.
 	 */

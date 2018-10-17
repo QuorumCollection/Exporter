@@ -280,6 +280,8 @@ class CsvEngine implements EngineInterface {
 	}
 
 	/**
+	 * Whether to disable the leading Byte Order Mark for the given encoding from being output.
+	 *
 	 * @param bool $disable
 	 */
 	public function disableBom( $disable = true ) {

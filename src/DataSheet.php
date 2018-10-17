@@ -28,29 +28,29 @@ class DataSheet implements \Iterator {
 	 */
 	protected $currentValue = null;
 
+	/**
+	 * DataSheet is the representation of a Worksheet
+	 *
+	 * @param string|null $name The name to give the sheet. The use is Engine implementation specific but is likely
+	 *     filename or Sheet name
+	 */
 	public function __construct( $name = null ) {
 		$this->name      = $name;
 		$this->tmpStream = fopen("php://temp", "r+");
 	}
 
 	/**
-	 * @return string
+	 * @return string|null
 	 */
 	public function getName() {
 		return $this->name;
 	}
 
 	/**
-	 * @param array|\Iterator $dataSet
-	 */
-	public function addRows( $dataSet ) {
-		foreach( $dataSet as $row ) {
-			$this->addRow($row);
-		}
-	}
-
-	/**
-	 * @param array $row
+	 * Append a row worth of data to the end of the Worksheet.
+	 *
+	 * @param array $row An array of scalars. Otherwise an InvalidDataTypeException will be thrown.
+	 * @throws InvalidDataTypeException
 	 */
 	public function addRow( array $row ) {
 		foreach( $row as &$col ) {
@@ -62,6 +62,17 @@ class DataSheet implements \Iterator {
 		}
 
 		fwrite($this->tmpStream, json_encode($row) . "\n");
+	}
+
+	/**
+	 * Append multiple rows of data to the end of the Worksheet.
+	 *
+	 * @param array|\Iterator $dataSet An iterable of arrays of scalars.
+	 */
+	public function addRows( $dataSet ) {
+		foreach( $dataSet as $row ) {
+			$this->addRow($row);
+		}
 	}
 
 	/**
@@ -100,7 +111,7 @@ class DataSheet implements \Iterator {
 	/**
 	 * Checks if current position is valid
 	 *
-	 * @return boolean
+	 * @return bool
 	 */
 	public function valid() {
 		return $this->currentValue !== null;

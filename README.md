@@ -44,9 +44,11 @@ composer require 'quorum/exporter'
 function __construct($engine)
 ```
 
+DataExport is the object used to orchestrate the export process regardless of export format.
+
 ##### Parameters:
 
-- ***\Quorum\Exporter\EngineInterface*** `$engine`
+- ***\Quorum\Exporter\EngineInterface*** `$engine` - The engine by which to export the data sheets.
 
 ---
 
@@ -61,7 +63,7 @@ Add a Data Sheet to the export.
 ##### Parameters:
 
 - ***\Quorum\Exporter\DataSheet*** `$sheet` - The DataSheet to add to the export
-- ***null*** | ***string*** `$sheetTitle` - Optional Title to give the data export.
+- ***string*** | ***null*** `$sheetTitle` - Optional Title to give the data export.
 Most Engines will interpret this as filename (sans file extension).
 If excluded, the name will be left to the engine.
 
@@ -82,9 +84,18 @@ NULL will open a php://output resource.
 
 ### Class: \Quorum\Exporter\DataSheet
 
+#### Method: DataSheet->__construct
 
+```php
+function __construct([ $name = null])
+```
 
-#### Undocumented Method: `DataSheet->__construct([ $name = null])`
+DataSheet is the representation of a Worksheet
+
+##### Parameters:
+
+- ***string*** | ***null*** `$name` - The name to give the sheet. The use is Engine implementation specific but is likely
+    filename or Sheet name
 
 ---
 
@@ -96,19 +107,7 @@ function getName()
 
 ##### Returns:
 
-- ***string***
-
----
-
-#### Method: DataSheet->addRows
-
-```php
-function addRows($dataSet)
-```
-
-##### Parameters:
-
-- ***array*** | ***\Iterator*** `$dataSet`
+- ***string*** | ***null***
 
 ---
 
@@ -118,9 +117,25 @@ function addRows($dataSet)
 function addRow($row)
 ```
 
+Append a row worth of data to the end of the Worksheet.
+
 ##### Parameters:
 
-- ***array*** `$row`
+- ***array*** `$row` - An array of scalars. Otherwise an InvalidDataTypeException will be thrown.
+
+---
+
+#### Method: DataSheet->addRows
+
+```php
+function addRows($dataSet)
+```
+
+Append multiple rows of data to the end of the Worksheet.
+
+##### Parameters:
+
+- ***array*** | ***\Iterator*** `$dataSet` - An iterable of arrays of scalars.
 
 ---
 
@@ -172,7 +187,7 @@ Checks if current position is valid
 
 ##### Returns:
 
-- ***boolean***
+- ***bool***
 
 ---
 
@@ -330,6 +345,8 @@ function getEnclosure()
 ```php
 function disableBom([ $disable = true])
 ```
+
+Whether to disable the leading Byte Order Mark for the given encoding from being output.
 
 ##### Parameters:
 

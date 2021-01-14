@@ -40,7 +40,7 @@ composer require 'quorum/exporter'
 #### Method: DataExport->__construct
 
 ```php
-function __construct($engine)
+function __construct(\Quorum\Exporter\EngineInterface $engine)
 ```
 
 DataExport is the object used to orchestrate the export process regardless of export format.
@@ -54,7 +54,7 @@ DataExport is the object used to orchestrate the export process regardless of ex
 #### Method: DataExport->addSheet
 
 ```php
-function addSheet($sheet [, $sheetTitle = null])
+function addSheet(\Quorum\Exporter\DataSheet $sheet [, $sheetTitle = null])
 ```
 
 Add a Data Sheet to the export.
@@ -94,7 +94,7 @@ DataSheet is the representation of a Worksheet
 ##### Parameters:
 
 - ***string*** | ***null*** `$name` - The name to give the sheet. The use is Engine implementation specific but is likely
-    filename or Sheet name
+filename or Sheet name
 
 ---
 
@@ -113,7 +113,7 @@ function getName()
 #### Method: DataSheet->addRow
 
 ```php
-function addRow($row)
+function addRow(array $row)
 ```
 
 Append a row worth of data to the end of the Worksheet.
@@ -207,15 +207,15 @@ Rewind the Iterator to the first element
 namespace Quorum\Exporter\Engines;
 
 class CsvEngine {
-	const STRATEGY_CONCAT = 'stat-concat';
-	const STRATEGY_ZIP = 'stat-zip';
-	const UTF8 = 'UTF-8';
-	const UTF16 = 'UTF-16';
-	const UTF16BE = 'UTF-16BE';
-	const UTF16LE = 'UTF-16LE';
-	const UTF32 = 'UTF-32';
-	const UTF32BE = 'UTF-32BE';
-	const UTF32LE = 'UTF-32LE';
+	public const STRATEGY_CONCAT = 'stat-concat';
+	public const STRATEGY_ZIP = 'stat-zip';
+	public const UTF8 = 'UTF-8';
+	public const UTF16 = 'UTF-16';
+	public const UTF16BE = 'UTF-16BE';
+	public const UTF16LE = 'UTF-16LE';
+	public const UTF32 = 'UTF-32';
+	public const UTF32BE = 'UTF-32BE';
+	public const UTF32LE = 'UTF-32LE';
 }
 ```
 
@@ -226,6 +226,7 @@ function __construct([ $outputEncoding = self::UTF16LE [, $delimiter = null [, $
 ```
 
 The default and highly recommended export format for CSV tab delimited UTF-16LE with leading Byte Order Mark.  
+  
 While this may seem like an odd choice, the reason for this is cross platform Microsoft Excel compatibility.  
 
 ##### You can read more on the topic here
@@ -284,6 +285,7 @@ function setMultiSheetStrategy($multiSheetStrategy)
 ```
 
 Set the strategy for allowing multiple sheets.  
+  
 Supported strategies are `CsvEngine::STRATEGY_ZIP` and `CsvEngine::STRATEGY_CONCAT`  
   
 - `CsvEngine::STRATEGY_ZIP` will output a single zipfile containing every sheet as a seperate CSV file.  
@@ -292,10 +294,6 @@ Supported strategies are `CsvEngine::STRATEGY_ZIP` and `CsvEngine::STRATEGY_CONC
 ##### Parameters:
 
 - ***string*** `$multiSheetStrategy` - Use the constant `CsvEngine::STRATEGY_ZIP` or `CsvEngine::STRATEGY_CONCAT`
-
-
-
-
 
 ---
 

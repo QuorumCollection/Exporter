@@ -78,6 +78,9 @@ class CsvEngine implements EngineInterface {
 		$this->setInputEncoding($inputEncoding);
 	}
 
+	/**
+	 * Character to use as CSV value enclosure. Commonly this will be `"`
+	 */
 	public function setEnclosure( string $enclosure ) : void {
 		if( strlen($enclosure) !== 1 ) {
 			throw new \InvalidArgumentException('Enclosure must be exactly one byte');
@@ -102,10 +105,18 @@ class CsvEngine implements EngineInterface {
 		$this->inputEncoding = $inputEncoding;
 	}
 
+	/**
+	 * Set the tmpDir to write interim files to.
+	 *
+	 * Defaults to `sys_get_temp_dir`
+	 */
 	public function setTmpDir( string $tmpDir ) : void {
 		$this->tmpDir = $tmpDir;
 	}
 
+	/**
+	 * Get the current strategy for Multi-Sheet export
+	 */
 	public function getMultiSheetStrategy() : string {
 		return $this->multiSheetStrategy;
 	}
@@ -115,7 +126,7 @@ class CsvEngine implements EngineInterface {
 	 *
 	 * Supported strategies are `CsvEngine::STRATEGY_ZIP` and `CsvEngine::STRATEGY_CONCAT`
 	 *
-	 * - `CsvEngine::STRATEGY_ZIP` will output a single zipfile containing every sheet as a seperate CSV file.
+	 * - `CsvEngine::STRATEGY_ZIP` will output a single zipfile containing every sheet as a separate CSV file.
 	 * - `CsvEngine::STRATEGY_CONCAT` will output a single CSV file with every sheet one after the next.
 	 *
 	 * @param string $multiSheetStrategy Use the constant `CsvEngine::STRATEGY_ZIP` or `CsvEngine::STRATEGY_CONCAT`
@@ -227,6 +238,9 @@ class CsvEngine implements EngineInterface {
 		$this->delimiter = $delimiter;
 	}
 
+	/**
+	 * Get the current character used for enclosure.
+	 */
 	public function getEnclosure() : string {
 		return $this->enclosure;
 	}

@@ -18,12 +18,12 @@ Supported formats:
 
 ## Requirements
 
-- **maennchen/zipstream-php**: ~0.3.0
+- **maennchen/zipstream-php**: ~2.1
 - **ext-SPL**: *
 - **ext-mbstring**: *
 - **ext-dom**: *
 - **ext-json**: *
-- **php**: >=5.4
+- **php**: >=7.2
 
 ## Installing
 
@@ -54,7 +54,7 @@ DataExport is the object used to orchestrate the export process regardless of ex
 #### Method: DataExport->addSheet
 
 ```php
-function addSheet(\Quorum\Exporter\DataSheet $sheet [, $sheetTitle = null])
+function addSheet(\Quorum\Exporter\DataSheet $sheet [, ?string $sheetTitle = null]) : void
 ```
 
 Add a Data Sheet to the export.
@@ -71,7 +71,7 @@ If excluded, the name will be left to the engine.
 #### Method: DataExport->export
 
 ```php
-function export([ $outputStream = null])
+function export([ $outputStream = null]) : void
 ```
 
 Trigger the final export process.
@@ -86,7 +86,7 @@ NULL will open a php://output resource.
 #### Method: DataSheet->__construct
 
 ```php
-function __construct([ $name = null])
+function __construct([ ?string $name = null])
 ```
 
 DataSheet is the representation of a Worksheet
@@ -101,19 +101,17 @@ filename or Sheet name
 #### Method: DataSheet->getName
 
 ```php
-function getName()
+function getName() : ?string
 ```
 
-##### Returns:
-
-- ***string*** | ***null***
+Get the name of the sheet. Use thereof is Engine Specific
 
 ---
 
 #### Method: DataSheet->addRow
 
 ```php
-function addRow(array $row)
+function addRow(array $row) : void
 ```
 
 Append a row worth of data to the end of the Worksheet.
@@ -127,7 +125,7 @@ Append a row worth of data to the end of the Worksheet.
 #### Method: DataSheet->addRows
 
 ```php
-function addRows($dataSet)
+function addRows($dataSet) : void
 ```
 
 Append multiple rows of data to the end of the Worksheet.
@@ -141,21 +139,17 @@ Append multiple rows of data to the end of the Worksheet.
 #### Method: DataSheet->current
 
 ```php
-function current()
+function current() : ?array
 ```
 
 Return the current value
-
-##### Returns:
-
-- ***array***
 
 ---
 
 #### Method: DataSheet->next
 
 ```php
-function next()
+function next() : void
 ```
 
 Move forward to next element
@@ -165,35 +159,27 @@ Move forward to next element
 #### Method: DataSheet->key
 
 ```php
-function key()
+function key() : int
 ```
 
 Return the key of the current element
-
-##### Returns:
-
-- ***mixed*** - scalar on success, or null on failure.
 
 ---
 
 #### Method: DataSheet->valid
 
 ```php
-function valid()
+function valid() : bool
 ```
 
 Checks if current position is valid
-
-##### Returns:
-
-- ***bool***
 
 ---
 
 #### Method: DataSheet->rewind
 
 ```php
-function rewind()
+function rewind() : void
 ```
 
 Rewind the Iterator to the first element
@@ -222,7 +208,7 @@ class CsvEngine {
 #### Method: CsvEngine->__construct
 
 ```php
-function __construct([ $outputEncoding = self::UTF16LE [, $delimiter = null [, $enclosure = '"' [, $inputEncoding = self::UTF8]]]])
+function __construct([ string $outputEncoding = self::UTF16LE [, ?string $delimiter = null [, string $enclosure = '"' [, string $inputEncoding = self::UTF8]]]])
 ```
 
 The default and highly recommended export format for CSV tab delimited UTF-16LE with leading Byte Order Mark.  
@@ -245,50 +231,46 @@ While this may seem like an odd choice, the reason for this is cross platform Mi
 #### Method: CsvEngine->setEnclosure
 
 ```php
-function setEnclosure($enclosure)
+function setEnclosure(string $enclosure) : void
 ```
 
-##### Parameters:
-
-- ***string*** `$enclosure`
+Character to use as CSV value enclosure. Commonly this will be `"`
 
 ---
 
 #### Method: CsvEngine->setTmpDir
 
 ```php
-function setTmpDir($tmpDir)
+function setTmpDir(string $tmpDir) : void
 ```
 
-##### Parameters:
-
-- ***string*** `$tmpDir`
+Set the tmpDir to write interim files to.  
+  
+Defaults to `sys_get_temp_dir`
 
 ---
 
 #### Method: CsvEngine->getMultiSheetStrategy
 
 ```php
-function getMultiSheetStrategy()
+function getMultiSheetStrategy() : string
 ```
 
-##### Returns:
-
-- ***string***
+Get the current strategy for Multi-Sheet export
 
 ---
 
 #### Method: CsvEngine->setMultiSheetStrategy
 
 ```php
-function setMultiSheetStrategy($multiSheetStrategy)
+function setMultiSheetStrategy(string $multiSheetStrategy) : void
 ```
 
 Set the strategy for allowing multiple sheets.  
   
 Supported strategies are `CsvEngine::STRATEGY_ZIP` and `CsvEngine::STRATEGY_CONCAT`  
   
-- `CsvEngine::STRATEGY_ZIP` will output a single zipfile containing every sheet as a seperate CSV file.  
+- `CsvEngine::STRATEGY_ZIP` will output a single zipfile containing every sheet as a separate CSV file.  
 - `CsvEngine::STRATEGY_CONCAT` will output a single CSV file with every sheet one after the next.
 
 ##### Parameters:
@@ -300,21 +282,17 @@ Supported strategies are `CsvEngine::STRATEGY_ZIP` and `CsvEngine::STRATEGY_CONC
 #### Method: CsvEngine->getDelimiter
 
 ```php
-function getDelimiter()
+function getDelimiter() : string
 ```
 
 Gets delimiter.  If unset, UTF-16 and UTF-32 default to TAB "\t", everything else to COMMA ","
-
-##### Returns:
-
-- ***string***
 
 ---
 
 #### Method: CsvEngine->setDelimiter
 
 ```php
-function setDelimiter($delimiter)
+function setDelimiter(?string $delimiter) : void
 ```
 
 Sets delimiter. Setting to NULL triggers automatic delimiter decision based on recommended encoding rules.
@@ -328,26 +306,20 @@ Sets delimiter. Setting to NULL triggers automatic delimiter decision based on r
 #### Method: CsvEngine->getEnclosure
 
 ```php
-function getEnclosure()
+function getEnclosure() : string
 ```
 
-##### Returns:
-
-- ***string***
+Get the current character used for enclosure.
 
 ---
 
 #### Method: CsvEngine->disableBom
 
 ```php
-function disableBom([ $disable = true])
+function disableBom([ bool $disable = true]) : void
 ```
 
 Whether to disable the leading Byte Order Mark for the given encoding from being output.
-
-##### Parameters:
-
-- ***bool*** `$disable`
 
 ### Class: \Quorum\Exporter\Engines\SpreadsheetMLEngine
 

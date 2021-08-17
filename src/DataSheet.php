@@ -35,6 +35,9 @@ class DataSheet implements \Iterator {
 		$this->tmpStream = fopen("php://temp", "r+");
 	}
 
+	/**
+	 * Get the name of the sheet. Use thereof is Engine Specific
+	 */
 	public function getName() : ?string {
 		return $this->name;
 	}

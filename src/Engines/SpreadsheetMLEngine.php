@@ -79,9 +79,6 @@ class SpreadsheetMLEngine implements EngineInterface {
 		return  (is_string($value) || is_int($value)) && ($value != '') && ($value != 'NULL') && (strlen(trim($value)) > 0);
 	}
 
-	/**
-	 * @return string
-	 */
 	protected function generateBaseXmlDocument() : string {
 		$doc = new \DOMDocument;
 //		$doc->formatOutput = true;

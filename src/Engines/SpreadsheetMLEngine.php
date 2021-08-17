@@ -11,10 +11,7 @@ class SpreadsheetMLEngine implements EngineInterface {
 
 	protected $autoIndex = 1;
 
-	/**
-	 * @inheritdoc
-	 */
-	public function processSheet( DataSheet $sheet ) {
+	public function processSheet( DataSheet $sheet ) : void {
 		$outputStream = fopen("php://temp", "r+");
 		foreach( $sheet as $dataRow ) {
 
@@ -31,6 +28,7 @@ class SpreadsheetMLEngine implements EngineInterface {
 					if( $wasEmpty ) {
 						$rowCell->setAttribute('ss:Index', $cell_index + 1);
 					}
+
 					$cellData = $doc->createElement('Data');
 					$cellData->setAttribute('ss:Type', is_numeric($value) ? 'Number' : 'String');
 					$cellData->appendChild($doc->createTextNode($value));
@@ -38,10 +36,12 @@ class SpreadsheetMLEngine implements EngineInterface {
 					if( stripos($value, "\n") !== false ) {
 						$rowCell->setAttribute('ss:StyleID', 's22');
 					}
+
 					$wasEmpty = false;
 				} else {
 					$wasEmpty = true;
 				}
+
 				$cell_index++;
 			}
 
@@ -57,10 +57,7 @@ class SpreadsheetMLEngine implements EngineInterface {
 		];
 	}
 
-	/**
-	 * @inheritdoc
-	 */
-	public function outputToStream( $outputStream ) {
+	public function outputToStream( $outputStream ) : void {
 		$baseXml = $this->generateBaseXmlDocument();
 
 		$splitDocument = preg_split('%(?:</?Replace_This_Element_With_Worksheet\d+/?>){1,2}%', $baseXml);
@@ -74,25 +71,18 @@ class SpreadsheetMLEngine implements EngineInterface {
 		fwrite($outputStream, end($splitDocument));
 	}
 
-	private function not_null( $value ) {
+	private function not_null( $value ) : bool {
 		if( is_array($value) ) {
-			if( sizeof($value) > 0 ) {
-				return true;
-			}
-
-			return false;
-		}
-		if( (is_string($value) || is_int($value)) && ($value != '') && ($value != 'NULL') && (strlen(trim($value)) > 0) ) {
-			return true;
+			return  sizeof($value) > 0;
 		}
 
-		return false;
+		return  (is_string($value) || is_int($value)) && ($value != '') && ($value != 'NULL') && (strlen(trim($value)) > 0);
 	}
 
 	/**
 	 * @return string
 	 */
-	protected function generateBaseXmlDocument() {
+	protected function generateBaseXmlDocument() : string {
 		$doc = new \DOMDocument;
 //		$doc->formatOutput = true;
 		$doc->appendChild($doc->createProcessingInstruction('mso-application', 'progid="Excel.Sheet"'));
@@ -146,7 +136,6 @@ class SpreadsheetMLEngine implements EngineInterface {
 
 			$replaceElement = $doc->createElement('Replace_This_Element_With_Worksheet' . $index);
 			$table->appendChild($replaceElement);
-
 
 //			if( isset($WData['headers']) && is_array($WData['headers']) ) {
 //				$row = $doc->createElement('Row');

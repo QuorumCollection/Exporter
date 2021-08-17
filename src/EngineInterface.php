@@ -6,16 +6,14 @@ interface EngineInterface {
 
 	/**
 	 * @param \Quorum\Exporter\DataSheet $sheet
-	 * @return void
 	 * @access private
 	 */
-	public function processSheet( DataSheet $sheet );
+	public function processSheet( DataSheet $sheet ) : void;
 
 	/**
 	 * @param resource $outputStream
-	 * @return void
 	 * @access private
 	 */
-	public function outputToStream( $outputStream );
+	public function outputToStream( $outputStream ) : void;
 
 }

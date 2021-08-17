@@ -6,14 +6,10 @@ use Quorum\Exporter\Exceptions\WritableException;
 
 class DataExport {
 
-	/**
-	 * @var DataSheet[]
-	 */
+	/** @var DataSheet[] */
 	protected $dataSheets = [];
 
-	/**
-	 * @var EngineInterface
-	 */
+	/** @var EngineInterface */
 	protected $engine;
 
 	/**
@@ -28,12 +24,12 @@ class DataExport {
 	/**
 	 * Add a Data Sheet to the export.
 	 *
-	 * @param DataSheet   $sheet The DataSheet to add to the export
+	 * @param DataSheet   $sheet      The DataSheet to add to the export
 	 * @param string|null $sheetTitle Optional Title to give the data export.
-	 * Most Engines will interpret this as filename (sans file extension).
-	 * If excluded, the name will be left to the engine.
+	 *                                Most Engines will interpret this as filename (sans file extension).
+	 *                                If excluded, the name will be left to the engine.
 	 */
-	public function addSheet( DataSheet $sheet, $sheetTitle = null ) {
+	public function addSheet( DataSheet $sheet, ?string $sheetTitle = null ) : void {
 		if( is_string($sheetTitle) ) {
 			$this->dataSheets[$sheetTitle] = $sheet;
 		} else {
@@ -45,10 +41,10 @@ class DataExport {
 	 * Trigger the final export process.
 	 *
 	 * @param resource|null $outputStream The stream resource to export to.
-	 * NULL will open a php://output resource.
+	 *                                    NULL will open a php://output resource.
 	 */
-	public function export( $outputStream = null ) {
-		if( is_null($outputStream) ) {
+	public function export( $outputStream = null ) : void {
+		if( $outputStream === null ) {
 			$outputStream = fopen('php://output', 'w');
 		}
 
@@ -62,4 +58,5 @@ class DataExport {
 
 		$this->engine->outputToStream($outputStream);
 	}
+
 }

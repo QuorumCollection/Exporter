@@ -6,6 +6,7 @@ use Quorum\Exporter\DataSheet;
 use Quorum\Exporter\EngineInterface;
 use Quorum\Exporter\Exceptions\ExportException;
 use Quorum\Exporter\Exceptions\OutputException;
+use ZipStream\Option\Archive;
 use ZipStream\ZipStream;
 
 class CsvEngine implements EngineInterface {
@@ -178,15 +179,19 @@ class CsvEngine implements EngineInterface {
 					throw new \RuntimeException("Temporary Directory Not Found");
 				}
 
-				$zip = new ZipStream(null, [ ZipStream::OPTION_OUTPUT_STREAM => $outputStream ]);
+				$opt = new Archive();
+				$opt->setOutputStream($outputStream);
+				$zip = new ZipStream('foo.zip', $opt);
 
 				foreach( $this->streams as $name => $stream ) {
 					rewind($stream);
 					$tmpStream = fopen("php://temp", "r+");
 					fwrite($tmpStream, $this->getBom());
 					stream_copy_to_stream($stream, $tmpStream);
+					rewind($tmpStream);
 
 					$zip->addFileFromStream($name . '.csv', $tmpStream);
+					fclose($tmpStream);
 				}
 
 				$zip->finish();

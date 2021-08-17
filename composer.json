@@ -2,7 +2,7 @@
 	"name": "quorum/exporter",
 	"description": "Export Data as Spreadsheets",
 	"require": {
-		"maennchen/zipstream-php": "~0.3.0",
+		"maennchen/zipstream-php": "~2.1",
 		"ext-SPL": "*",
 		"ext-mbstring": "*",
 		"ext-dom": "*",

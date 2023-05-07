@@ -6,8 +6,7 @@
 			<badge-poser type="version" />
 			<badge-poser type="downloads" />
 			<badge-poser type="license" />
-			<badge-scrutinizer type="quality" name="QuorumCollection/Exporter" />
-			<badge-scrutinizer type="build-status" name="QuorumCollection/Exporter" />
+			<badge-github-action name="QuorumCollection/Exporter" workflow-file="ci.yml"/>
             <text><![CDATA[
 A Streamed Data Export Tool
 

@@ -3,8 +3,7 @@
 [![Latest Stable Version](https://poser.pugx.org/quorum/exporter/version)](https://packagist.org/packages/quorum/exporter)
 [![Total Downloads](https://poser.pugx.org/quorum/exporter/downloads)](https://packagist.org/packages/quorum/exporter)
 [![License](https://poser.pugx.org/quorum/exporter/license)](https://packagist.org/packages/quorum/exporter)
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/QuorumCollection/Exporter/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/QuorumCollection/Exporter)
-[![Build Status](https://scrutinizer-ci.com/g/QuorumCollection/Exporter/badges/build.png?b=master)](https://scrutinizer-ci.com/g/QuorumCollection/Exporter)
+[![ci.yml](https://github.com/QuorumCollection/Exporter/actions/workflows/ci.yml/badge.svg?)](https://github.com/QuorumCollection/Exporter/actions/workflows/ci.yml)
 
 
 A Streamed Data Export Tool

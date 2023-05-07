@@ -9,20 +9,11 @@ class DataSheet implements \Iterator {
 	/** @var resource */
 	protected $tmpStream;
 
-	/** @var string|null */
-	protected $name;
-	/**
-	 * The row counter.
-	 *
-	 * @var int
-	 */
-	protected $rowIndex = 0;
-	/**
-	 * The current iterator value
-	 *
-	 * @var array|null
-	 */
-	protected $currentValue;
+	protected ?string $name;
+	/** The row counter. */
+	protected int $rowIndex = 0;
+	/** The current iterator value */
+	protected ?array $currentValue;
 
 	/**
 	 * DataSheet is the representation of a Worksheet
@@ -45,7 +36,7 @@ class DataSheet implements \Iterator {
 	/**
 	 * Append a row worth of data to the end of the Worksheet.
 	 *
-	 * @param array $row An array of scalars. Otherwise an InvalidDataTypeException will be thrown.
+	 * @param array $row An array of scalars.
 	 * @throws InvalidDataTypeException
 	 */
 	public function addRow( array $row ) : void {

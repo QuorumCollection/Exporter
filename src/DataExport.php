@@ -7,10 +7,9 @@ use Quorum\Exporter\Exceptions\WritableException;
 class DataExport {
 
 	/** @var DataSheet[] */
-	protected $dataSheets = [];
+	protected array $dataSheets = [];
 
-	/** @var EngineInterface */
-	protected $engine;
+	protected EngineInterface $engine;
 
 	/**
 	 * DataExport is the object used to orchestrate the export process regardless of export format.

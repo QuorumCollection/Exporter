@@ -100,20 +100,20 @@ class SpreadsheetMLEngine implements EngineInterface {
 		$styles = $doc->createElement('Styles');
 		$styles = $workbook->appendChild($styles);
 
-		//Default
+		// Default
 		$style = $doc->createElement('Style');
 		$style->setAttribute('ss:ID', 'Default');
 		$style->setAttribute('ss:Name', 'Normal');
 		$style->appendChild($doc->createElement('Alignment'))->setAttribute('ss:Vertical', 'Bottom');
 		$styles->appendChild($style);
 
-		//Headers
+		// Headers
 		$style = $doc->createElement('Style');
 		$style->setAttribute('ss:ID', 's21');
 		$style->appendChild($doc->createElement('Font'))->setAttribute('ss:Bold', '1');
 		$styles->appendChild($style);
 
-		//Multi-line
+		// Multi-line
 		$style = $doc->createElement('Style');
 		$style->setAttribute('ss:ID', 's22');
 		$align = $doc->createElement('Alignment');

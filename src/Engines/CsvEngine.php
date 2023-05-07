@@ -26,30 +26,22 @@ class CsvEngine implements EngineInterface {
 	public const UTF32LE = 'UTF-32LE';
 
 	/** @var resource[] */
-	protected $streams = [];
+	protected array $streams = [];
 
-	/**
-	 * @var string
-	 * @var string
-	 */
-	protected $outputEncoding, $inputEncoding;
+	protected string $outputEncoding;
+	protected string $inputEncoding;
 
-	/**
-	 * @var string
-	 * @var string
-	 */
-	protected $delimiter, $enclosure;
+	protected ?string $delimiter;
+	protected string $enclosure;
 
-	protected $multiSheetStrategy = self::STRATEGY_CONCAT;
+	protected string $multiSheetStrategy = self::STRATEGY_CONCAT;
 
-	/** @var bool */
-	protected $disableBom = false;
+	protected bool $disableBom = false;
 
-	/** @var int */
-	protected $autoIndex = 1;
+	protected int $autoIndex = 1;
 
 	/** @var string */
-	protected $tmpDir, $tmpPrefix = 'csv-export-';
+	protected $tmpDir;
 
 	/**
 	 * The default and highly recommended export format for CSV tab delimited UTF-16LE with leading Byte Order Mark.
@@ -90,7 +82,7 @@ class CsvEngine implements EngineInterface {
 	}
 
 	protected function setOutputEncoding( string $outputEncoding ) : void {
-		if( !in_array($outputEncoding, mb_list_encodings()) ) {
+		if( !in_array($outputEncoding, mb_list_encodings(), true) ) {
 			throw new \InvalidArgumentException('Invalid Encoding');
 		}
 
@@ -261,7 +253,7 @@ class CsvEngine implements EngineInterface {
 
 		switch( $encoding ) {
 			// commented out for the time being. There's almost NO case where you would want a UTF-8 BOM
-			//case 'UTF-8':
+			// case 'UTF-8':
 			//	return "\xEF\xBB\xBF";
 			case self::UTF16BE:
 				return "\xFE\xFF";

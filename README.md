@@ -23,7 +23,7 @@ Supported formats:
 - **ext-mbstring**: *
 - **ext-dom**: *
 - **ext-json**: *
-- **php**: >=7.2
+- **php**: >=7.4
 
 ## Installing
 
@@ -118,7 +118,9 @@ Append a row worth of data to the end of the Worksheet.
 
 ##### Parameters:
 
-- ***array*** `$row` - An array of scalars. Otherwise an InvalidDataTypeException will be thrown.
+- ***array*** `$row` - An array of scalars.
+
+**Throws**: `\Quorum\Exporter\Exceptions\InvalidDataTypeException`
 
 ---
 

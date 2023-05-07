@@ -6,3 +6,4 @@ clover.xml
 *.csv
 *.zip
 /composer.lock
+*.cache

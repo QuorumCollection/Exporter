@@ -14,7 +14,7 @@ class CsvIntegrationTest extends TestCase {
 	 */
 	public function test_csv( string $encoding ) : void {
 		$export = new DataExport(new CsvEngine($encoding));
-		$sheet  = new DataSheet();
+		$sheet  = new DataSheet;
 		$export->addSheet($sheet);
 
 		$temp    = tmpfile();

@@ -23,7 +23,7 @@ class CsvIntegrationTest extends \PHPUnit\Framework\TestCase {
 		$sheet->addRow([ 'test one', '日本語', 'test two' ]);
 		$export->export($temp);
 
-		$file = __DIR__ . '/data/basic-csv-' . $encoding . '.csv';
+		$file = __DIR__ . '/fixtures/basic-csv-' . $encoding . '.csv';
 
 		$this->assertFileEquals($file, $tmpFile);
 

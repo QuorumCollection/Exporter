@@ -22,6 +22,11 @@ Supported formats:
 			<section title="Installing">
 				<composer-install/>
 			</section>
+			<section title="Example">
+				<section title="Simple CSV Export">
+					<source name="example/simplecsv.php" lang="php" />
+				</section>
+			</section>
             <section title="Documentation">
                 <recursive-directory name="src/" />
             </section>

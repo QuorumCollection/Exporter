@@ -325,6 +325,18 @@ Whether to disable the leading Byte Order Mark for the given encoding from being
 
 ### Class: \Quorum\Exporter\Engines\SpreadsheetMLEngine
 
+---
+
+#### Method: SpreadsheetMLEngine->setCreatedTime
+
+```php
+function setCreatedTime(?int $createdTime) : void
+```
+
+##### Parameters:
+
+- ***int*** | ***null*** `$createdTime` - The timestamp to use for the created time. If null, the current time will be used.
+
 ### Class: \Quorum\Exporter\Exceptions\ExportException
 
 ### Class: \Quorum\Exporter\Exceptions\InvalidDataTypeException

@@ -11,6 +11,8 @@ class SpreadsheetMLEngine implements EngineInterface {
 
 	protected $autoIndex = 1;
 
+	protected ?int $createdTime = null;
+
 	public function processSheet( DataSheet $sheet ) : void {
 		$outputStream = fopen("php://temp", "r+");
 		foreach( $sheet as $dataRow ) {
@@ -89,12 +91,12 @@ class SpreadsheetMLEngine implements EngineInterface {
 		$workbook->setAttribute('xmlns:o', 'urn:schemas-microsoft-com:office:office');
 		$workbook->setAttribute('xmlns:x', 'urn:schemas-microsoft-com:office:excel');
 		$workbook->setAttribute('xmlns:ss', 'urn:schemas-microsoft-com:office:spreadsheet');
-		$workbook->setAttribute('xmlns:html', 'http://www.w3.org/TR/REC-html40');
+//		$workbook->setAttribute('xmlns:html', 'http://www.w3.org/TR/REC-html40');
 		$doc->appendChild($workbook);
 
 		$documentProperties = $doc->createElement('DocumentProperties');
 		$documentProperties->setAttribute('xmlns', 'urn:schemas-microsoft-com:office:office');
-		$documentProperties->appendChild($doc->createElement('Created', date('c')));
+		$documentProperties->appendChild($doc->createElement('Created', date('c', $this->createdTime ?: time())));
 		$workbook->appendChild($documentProperties);
 
 		$styles = $doc->createElement('Styles');
@@ -150,6 +152,13 @@ class SpreadsheetMLEngine implements EngineInterface {
 		}
 
 		return $doc->saveXML();
+	}
+
+	/**
+	 * @param int|null $createdTime The timestamp to use for the created time. If null, the current time will be used.
+	 */
+	public function setCreatedTime( ?int $createdTime ) : void {
+		$this->createdTime = $createdTime;
 	}
 
 }

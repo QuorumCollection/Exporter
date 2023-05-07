@@ -2,11 +2,12 @@
 
 namespace Integration;
 
+use PHPUnit\Framework\TestCase;
 use Quorum\Exporter\DataExport;
 use Quorum\Exporter\DataSheet;
 use Quorum\Exporter\Engines\CsvEngine;
 
-class CsvIntegrationTest extends \PHPUnit\Framework\TestCase {
+class CsvIntegrationTest extends TestCase {
 
 	/**
 	 * @dataProvider encodingProvider

@@ -6,55 +6,42 @@ use Quorum\Exporter\Exceptions\InvalidDataTypeException;
 
 class DataSheet implements \Iterator {
 
-	/**
-	 * @var resource
-	 */
+	/** @var resource */
 	protected $tmpStream;
 
-	/**
-	 * @var string|null
-	 */
-	protected $name;
-	/**
-	 * The row counter.
-	 *
-	 * @var int
-	 */
-	protected $rowIndex = 0;
-	/**
-	 * The current iterator value
-	 *
-	 * @var array|null
-	 */
-	protected $currentValue = null;
+	protected ?string $name;
+	/** The row counter. */
+	protected int $rowIndex = 0;
+	/** The current iterator value */
+	protected ?array $currentValue;
 
 	/**
 	 * DataSheet is the representation of a Worksheet
 	 *
 	 * @param string|null $name The name to give the sheet. The use is Engine implementation specific but is likely
-	 *     filename or Sheet name
+	 *                          filename or Sheet name
 	 */
-	public function __construct( $name = null ) {
+	public function __construct( ?string $name = null ) {
 		$this->name      = $name;
 		$this->tmpStream = fopen("php://temp", "r+");
 	}
 
 	/**
-	 * @return string|null
+	 * Get the name of the sheet. Use thereof is Engine Specific
 	 */
-	public function getName() {
+	public function getName() : ?string {
 		return $this->name;
 	}
 
 	/**
 	 * Append a row worth of data to the end of the Worksheet.
 	 *
-	 * @param array $row An array of scalars. Otherwise an InvalidDataTypeException will be thrown.
+	 * @param array $row An array of scalars.
 	 * @throws InvalidDataTypeException
 	 */
-	public function addRow( array $row ) {
+	public function addRow( array $row ) : void {
 		foreach( $row as &$col ) {
-			if( !is_scalar($col) && !is_null($col) ) {
+			if( !is_scalar($col) && $col !== null ) {
 				throw new InvalidDataTypeException;
 			}
 
@@ -69,7 +56,7 @@ class DataSheet implements \Iterator {
 	 *
 	 * @param array|\Iterator $dataSet An iterable of arrays of scalars.
 	 */
-	public function addRows( $dataSet ) {
+	public function addRows( $dataSet ) : void {
 		foreach( $dataSet as $row ) {
 			$this->addRow($row);
 		}
@@ -77,17 +64,15 @@ class DataSheet implements \Iterator {
 
 	/**
 	 * Return the current value
-	 *
-	 * @return array
 	 */
-	public function current() {
+	public function current() : ?array {
 		return $this->currentValue;
 	}
 
 	/**
 	 * Move forward to next element
 	 */
-	public function next() {
+	public function next() : void {
 		$string = fgets($this->tmpStream);
 
 		if( $string === false ) {
@@ -101,28 +86,26 @@ class DataSheet implements \Iterator {
 	/**
 	 * Return the key of the current element
 	 *
-	 * @link http://php.net/manual/en/iterator.key.php
-	 * @return mixed scalar on success, or null on failure.
+	 * @see http://php.net/manual/en/iterator.key.php
 	 */
-	public function key() {
+	public function key() : int {
 		return $this->rowIndex;
 	}
 
 	/**
 	 * Checks if current position is valid
-	 *
-	 * @return bool
 	 */
-	public function valid() {
+	public function valid() : bool {
 		return $this->currentValue !== null;
 	}
 
 	/**
 	 * Rewind the Iterator to the first element
 	 */
-	public function rewind() {
+	public function rewind() : void {
 		$this->rowIndex = 0;
 		rewind($this->tmpStream);
 		$this->next();
 	}
+
 }

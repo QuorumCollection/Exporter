@@ -4,5 +4,7 @@ clover.xml
 .idea/
 
 *.csv
+!test/**/*.csv
 *.zip
 /composer.lock
+*.cache

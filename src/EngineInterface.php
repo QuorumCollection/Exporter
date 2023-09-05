@@ -5,7 +5,6 @@ namespace Quorum\Exporter;
 interface EngineInterface {
 
 	/**
-	 * @param \Quorum\Exporter\DataSheet $sheet
 	 * @access private
 	 */
 	public function processSheet( DataSheet $sheet ) : void;

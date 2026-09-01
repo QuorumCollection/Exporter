@@ -11,6 +11,7 @@ A Streamed Data Export Tool
 Supported formats:
 - CSV / TSV
 - SpreadsheetML "Excel 2004 XML Spreadsheet"
+- XLSX "Office Open XML Spreadsheet"
 - More to come.
 
 
@@ -366,6 +367,25 @@ Whether to disable the leading Byte Order Mark for the given encoding from being
 ---
 
 #### Method: SpreadsheetMLEngine->setCreatedTime
+
+```php
+function setCreatedTime(?int $createdTime) : void
+```
+
+##### Parameters:
+
+- ***int*** | ***null*** `$createdTime` - The timestamp to use for the created time. If null, the current time will be used.
+
+### Class: \Quorum\Exporter\Engines\XlsxEngine
+
+Writes a minimal Office Open XML spreadsheet (XLSX) archive.
+
+This intentionally mirrors SpreadsheetMLEngine: values are either numbers or
+strings, empty values leave gaps in their rows, and multiline strings wrap.
+
+---
+
+#### Method: XlsxEngine->setCreatedTime
 
 ```php
 function setCreatedTime(?int $createdTime) : void

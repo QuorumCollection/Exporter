@@ -10,6 +10,7 @@
 		"php": ">=7.4"
 	},
 	"require-dev": {
+		"ext-zip": "*",
 		"donatj/drop": "*",
 		"phpunit/phpunit": "4.* | ~8.5 | ^9.0",
 		"friendsofphp/php-cs-fixer": "^3.16",

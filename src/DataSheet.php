@@ -4,6 +4,9 @@ namespace Quorum\Exporter;
 
 use Quorum\Exporter\Exceptions\InvalidDataTypeException;
 
+/**
+ * @implements \Iterator<int, array<int|string, string>>
+ */
 class DataSheet implements \Iterator {
 
 	/** @var resource */
@@ -12,7 +15,7 @@ class DataSheet implements \Iterator {
 	protected ?string $name;
 	/** The row counter. */
 	protected int $rowIndex = 0;
-	/** The current iterator value */
+	/** @var array<int|string, string>|null The current iterator value */
 	protected ?array $currentValue;
 
 	/**
@@ -22,8 +25,14 @@ class DataSheet implements \Iterator {
 	 *                          filename or Sheet name
 	 */
 	public function __construct( ?string $name = null ) {
-		$this->name      = $name;
-		$this->tmpStream = fopen("php://temp", "r+");
+		$this->name = $name;
+
+		$tmpStream = fopen("php://temp", "r+");
+		if( $tmpStream === false ) {
+			throw new \RuntimeException('Unable to open temporary stream');
+		}
+
+		$this->tmpStream = $tmpStream;
 	}
 
 	/**
@@ -36,7 +45,7 @@ class DataSheet implements \Iterator {
 	/**
 	 * Append a row worth of data to the end of the Worksheet.
 	 *
-	 * @param array $row An array of scalars.
+	 * @param array<mixed> $row An array of scalars.
 	 * @throws InvalidDataTypeException
 	 */
 	public function addRow( array $row ) : void {
@@ -48,13 +57,18 @@ class DataSheet implements \Iterator {
 			$col = (string)$col;
 		}
 
-		fwrite($this->tmpStream, json_encode($row) . "\n");
+		$jsonRow = json_encode($row);
+		if( $jsonRow === false ) {
+			throw new InvalidDataTypeException('Unable to encode row');
+		}
+
+		fwrite($this->tmpStream, $jsonRow . "\n");
 	}
 
 	/**
 	 * Append multiple rows of data to the end of the Worksheet.
 	 *
-	 * @param array|\Iterator $dataSet An iterable of arrays of scalars.
+	 * @param iterable<array<mixed>> $dataSet An iterable of arrays of scalars.
 	 */
 	public function addRows( $dataSet ) : void {
 		foreach( $dataSet as $row ) {
@@ -78,9 +92,30 @@ class DataSheet implements \Iterator {
 		if( $string === false ) {
 			$this->currentValue = null;
 		} else {
-			$this->currentValue = json_decode($string, true);
+			$this->currentValue = $this->decodeRow($string);
 			$this->rowIndex++;
 		}
+	}
+
+	/**
+	 * @return array<int|string, string>
+	 */
+	private function decodeRow( string $row ) : array {
+		$decodedRow = json_decode($row, true);
+		if( !is_array($decodedRow) ) {
+			throw new \UnexpectedValueException('Unable to decode row');
+		}
+
+		$normalizedRow = [];
+		foreach( $decodedRow as $key => $value ) {
+			if( !is_string($value) ) {
+				throw new \UnexpectedValueException('Decoded row contains a non-string value');
+			}
+
+			$normalizedRow[$key] = $value;
+		}
+
+		return $normalizedRow;
 	}
 
 	/**

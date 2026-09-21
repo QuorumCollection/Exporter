@@ -3,7 +3,7 @@
 [![Latest Stable Version](https://poser.pugx.org/quorum/exporter/version)](https://packagist.org/packages/quorum/exporter)
 [![Total Downloads](https://poser.pugx.org/quorum/exporter/downloads)](https://packagist.org/packages/quorum/exporter)
 [![License](https://poser.pugx.org/quorum/exporter/license)](https://packagist.org/packages/quorum/exporter)
-[![ci.yml](https://github.com/QuorumCollection/Exporter/actions/workflows/ci.yml/badge.svg?)](https://github.com/QuorumCollection/Exporter/actions/workflows/ci.yml)
+[![ci.yml](https://github.com/QuorumCollection/Exporter/actions/workflows/ci.yml/badge.svg)](https://github.com/QuorumCollection/Exporter/actions/workflows/ci.yml)
 
 
 A Streamed Data Export Tool
@@ -73,7 +73,7 @@ $exporter->export();
 
 ## Documentation
 
-### Class: \Quorum\Exporter\DataExport
+### Class: Quorum\Exporter\DataExport
 
 #### Method: DataExport->__construct
 
@@ -119,7 +119,7 @@ Trigger the final export process.
 - ***resource*** | ***null*** `$outputStream` - The stream resource to export to.
 NULL will open a php://output resource.
 
-### Class: \Quorum\Exporter\DataSheet
+### Class: Quorum\Exporter\DataSheet
 
 #### Method: DataSheet->__construct
 
@@ -224,9 +224,9 @@ function rewind() : void
 
 Rewind the Iterator to the first element
 
-### Class: \Quorum\Exporter\EngineInterface
+### Class: Quorum\Exporter\EngineInterface
 
-### Class: \Quorum\Exporter\Engines\CsvEngine
+### Class: Quorum\Exporter\Engines\CsvEngine
 
 ```php
 <?php
@@ -361,7 +361,7 @@ function disableBom([ bool $disable = true]) : void
 
 Whether to disable the leading Byte Order Mark for the given encoding from being output.
 
-### Class: \Quorum\Exporter\Engines\SpreadsheetMLEngine
+### Class: Quorum\Exporter\Engines\SpreadsheetMLEngine
 
 ---
 
@@ -375,10 +375,10 @@ function setCreatedTime(?int $createdTime) : void
 
 - ***int*** | ***null*** `$createdTime` - The timestamp to use for the created time. If null, the current time will be used.
 
-### Class: \Quorum\Exporter\Exceptions\ExportException
+### Class: Quorum\Exporter\Exceptions\ExportException
 
-### Class: \Quorum\Exporter\Exceptions\InvalidDataTypeException
+### Class: Quorum\Exporter\Exceptions\InvalidDataTypeException
 
-### Class: \Quorum\Exporter\Exceptions\OutputException
+### Class: Quorum\Exporter\Exceptions\OutputException
 
-### Class: \Quorum\Exporter\Exceptions\WritableException
+### Class: Quorum\Exporter\Exceptions\WritableException

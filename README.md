@@ -121,6 +121,8 @@ NULL will open a php://output resource.
 
 ### Class: Quorum\Exporter\DataSheet
 
+
+
 #### Method: DataSheet->__construct
 
 ```php
@@ -156,7 +158,7 @@ Append a row worth of data to the end of the Worksheet.
 
 ##### Parameters:
 
-- ***array*** `$row` - An array of scalars.
+- ***array<int|string,mixed>*** `$row` - An array of scalars.
 
 **Throws**: `\Quorum\Exporter\Exceptions\InvalidDataTypeException`
 
@@ -172,7 +174,7 @@ Append multiple rows of data to the end of the Worksheet.
 
 ##### Parameters:
 
-- ***array*** | ***\Iterator*** `$dataSet` - An iterable of arrays of scalars.
+- ***iterable<array<int|string,mixed>>*** `$dataSet` - An iterable of arrays of scalars.
 
 ---
 

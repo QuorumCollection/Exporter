@@ -45,7 +45,7 @@ class DataSheet implements \Iterator {
 	/**
 	 * Append a row worth of data to the end of the Worksheet.
 	 *
-	 * @param array<int|string, mixed> $row An array of scalars.
+	 * @param array<mixed> $row An array of scalars.
 	 * @throws InvalidDataTypeException
 	 */
 	public function addRow( array $row ) : void {
@@ -68,7 +68,7 @@ class DataSheet implements \Iterator {
 	/**
 	 * Append multiple rows of data to the end of the Worksheet.
 	 *
-	 * @param iterable<array<int|string, mixed>> $dataSet An iterable of arrays of scalars.
+	 * @param iterable<array<mixed>> $dataSet An iterable of arrays of scalars.
 	 */
 	public function addRows( $dataSet ) : void {
 		foreach( $dataSet as $row ) {

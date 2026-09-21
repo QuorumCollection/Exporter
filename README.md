@@ -158,7 +158,7 @@ Append a row worth of data to the end of the Worksheet.
 
 ##### Parameters:
 
-- ***array<int|string,mixed>*** `$row` - An array of scalars.
+- ***mixed[]*** `$row` - An array of scalars.
 
 **Throws**: `\Quorum\Exporter\Exceptions\InvalidDataTypeException`
 
@@ -174,7 +174,7 @@ Append multiple rows of data to the end of the Worksheet.
 
 ##### Parameters:
 
-- ***iterable<array<int|string,mixed>>*** `$dataSet` - An iterable of arrays of scalars.
+- ***iterable<mixed[]>*** `$dataSet` - An iterable of arrays of scalars.
 
 ---
 

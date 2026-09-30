@@ -25,7 +25,7 @@ class CsvEngine implements EngineInterface {
 	public const UTF32BE = 'UTF-32BE';
 	public const UTF32LE = 'UTF-32LE';
 
-	/** @var resource[] */
+	/** @var array<string, resource> */
 	protected array $streams = [];
 
 	protected string $outputEncoding;
@@ -40,8 +40,7 @@ class CsvEngine implements EngineInterface {
 
 	protected int $autoIndex = 1;
 
-	/** @var string */
-	protected $tmpDir;
+	protected ?string $tmpDir = null;
 
 	/**
 	 * The default and highly recommended export format for CSV tab delimited UTF-16LE with leading Byte Order Mark.
@@ -133,18 +132,34 @@ class CsvEngine implements EngineInterface {
 
 	public function processSheet( DataSheet $sheet ) : void {
 		$outputStream = fopen("php://temp", "r+");
+		if( $outputStream === false ) {
+			throw new OutputException('Unable to open temporary output stream');
+		}
 
 		foreach( $sheet as $data ) {
 			$mem = fopen('php://memory', 'w+');
-			if( ($length = @fputcsv($mem, $data, $this->getDelimiter(), $this->getEnclosure())) === false ) {
+			if( $mem === false ) {
+				throw new OutputException('Unable to open temporary memory stream');
+			}
+
+			if( ($length = @fputcsv($mem, $data, $this->getDelimiter(), $this->getEnclosure())) === false || $length === 0 ) {
+				fclose($mem);
+
 				throw new ExportException('fputcsv failed');
 			}
 
 			rewind($mem);
 			$line = fread($mem, $length);
 			fclose($mem);
+			if( $line === false ) {
+				throw new ExportException('Unable to read CSV data');
+			}
 
 			$line = mb_convert_encoding($line, $this->outputEncoding, $this->inputEncoding);
+			if( $line === false ) {
+				throw new ExportException('Unable to convert CSV data');
+			}
+
 			fputs($outputStream, $line);
 		}
 
@@ -174,6 +189,10 @@ class CsvEngine implements EngineInterface {
 				foreach( $this->streams as $name => $stream ) {
 					rewind($stream);
 					$tmpStream = fopen("php://temp", "r+");
+					if( $tmpStream === false ) {
+						throw new OutputException('Unable to open temporary output stream');
+					}
+
 					fwrite($tmpStream, $this->getBom());
 					stream_copy_to_stream($stream, $tmpStream);
 					rewind($tmpStream);
@@ -269,7 +288,7 @@ class CsvEngine implements EngineInterface {
 	}
 
 	final protected function isLittleEndian() : bool {
-		return unpack('S', "\x01\x00")[1] === 1;
+		return unpack('S', "\x01\x00") === [ 1 => 1 ];
 	}
 
 	/**

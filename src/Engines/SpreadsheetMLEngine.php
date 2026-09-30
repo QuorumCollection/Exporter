@@ -7,14 +7,19 @@ use Quorum\Exporter\EngineInterface;
 
 class SpreadsheetMLEngine implements EngineInterface {
 
-	protected $worksheetData = [];
+	/** @var list<array{name: string, stream: resource}> */
+	protected array $worksheetData = [];
 
-	protected $autoIndex = 1;
+	protected int $autoIndex = 1;
 
 	protected ?int $createdTime = null;
 
 	public function processSheet( DataSheet $sheet ) : void {
 		$outputStream = fopen("php://temp", "r+");
+		if( $outputStream === false ) {
+			throw new \RuntimeException('Unable to open temporary output stream');
+		}
+
 		foreach( $sheet as $dataRow ) {
 
 			$doc = new \DOMDocument;
@@ -28,7 +33,7 @@ class SpreadsheetMLEngine implements EngineInterface {
 					$rowCell = $doc->createElement('Cell');
 					$row->appendChild($rowCell);
 					if( $wasEmpty ) {
-						$rowCell->setAttribute('ss:Index', $cell_index + 1);
+						$rowCell->setAttribute('ss:Index', (string)($cell_index + 1));
 					}
 
 					$cellData = $doc->createElement('Data');
@@ -49,7 +54,15 @@ class SpreadsheetMLEngine implements EngineInterface {
 
 			// Allows you to output without an XML Declaration
 			$xmlData = $doc->saveXML($doc->documentElement);
+			if( $xmlData === false ) {
+				throw new \RuntimeException('Unable to generate worksheet XML');
+			}
+
 			$xmlData = preg_replace('/\r\n|\r|\n/', '&#13;', $xmlData);
+			if( $xmlData === null ) {
+				throw new \RuntimeException('Unable to normalize worksheet XML');
+			}
+
 			fwrite($outputStream, $xmlData);
 		}
 
@@ -63,22 +76,31 @@ class SpreadsheetMLEngine implements EngineInterface {
 		$baseXml = $this->generateBaseXmlDocument();
 
 		$splitDocument = preg_split('%(?:</?Replace_This_Element_With_Worksheet\d+/?>){1,2}%', $baseXml);
+		if( $splitDocument === false ) {
+			throw new \RuntimeException('Unable to split workbook XML');
+		}
 
 		foreach( $this->worksheetData as $index => $sheetData ) {
-			fwrite($outputStream, $splitDocument[$index]);
+			$documentPart = $splitDocument[$index] ?? null;
+			if( $documentPart === null ) {
+				throw new \RuntimeException('Worksheet placeholder is missing');
+			}
+
+			fwrite($outputStream, $documentPart);
 			rewind($sheetData['stream']);
 			stream_copy_to_stream($sheetData['stream'], $outputStream);
 		}
 
-		fwrite($outputStream, end($splitDocument));
-	}
-
-	private function not_null( $value ) : bool {
-		if( is_array($value) ) {
-			return  sizeof($value) > 0;
+		$finalDocumentPart = end($splitDocument);
+		if( $finalDocumentPart === false ) {
+			throw new \RuntimeException('Workbook XML is empty');
 		}
 
-		return  (is_string($value) || is_int($value)) && ($value != '') && ($value != 'NULL') && (strlen(trim($value)) > 0);
+		fwrite($outputStream, $finalDocumentPart);
+	}
+
+	private function not_null( string $value ) : bool {
+		return $value != '' && $value != 'NULL' && strlen(trim($value)) > 0;
 	}
 
 	protected function generateBaseXmlDocument() : string {
@@ -151,7 +173,12 @@ class SpreadsheetMLEngine implements EngineInterface {
 //			}
 		}
 
-		return $doc->saveXML();
+		$xml = $doc->saveXML();
+		if( $xml === false ) {
+			throw new \RuntimeException('Unable to generate workbook XML');
+		}
+
+		return $xml;
 	}
 
 	/**

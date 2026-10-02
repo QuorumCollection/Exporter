@@ -15,6 +15,7 @@ return (new PhpCsFixer\Config)
 	->setLineEnding("\n")
 	//->setUsingLinter(false)
 	->setRiskyAllowed(true)
+	->setUnsupportedPhpVersionAllowed(true)
 	->setRules(
 		[
 			'@PHPUnit84Migration:risky'              => true,
@@ -182,5 +183,4 @@ return (new PhpCsFixer\Config)
 		]
 	)
 	->setFinder($finder);
-
 

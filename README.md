@@ -83,7 +83,7 @@ function __construct(\Quorum\Exporter\EngineInterface $engine)
 
 DataExport is the object used to orchestrate the export process regardless of export format.
 
-##### Parameters:
+##### Parameters
 
 - ***\Quorum\Exporter\EngineInterface*** `$engine` - The engine by which to export the data sheets.
 
@@ -92,12 +92,12 @@ DataExport is the object used to orchestrate the export process regardless of ex
 #### Method: DataExport->addSheet
 
 ```php
-function addSheet(\Quorum\Exporter\DataSheet $sheet [, ?string $sheetTitle = null]) : void
+function addSheet(\Quorum\Exporter\DataSheet $sheet, ?string $sheetTitle = null): void
 ```
 
 Add a Data Sheet to the export.
 
-##### Parameters:
+##### Parameters
 
 - ***\Quorum\Exporter\DataSheet*** `$sheet` - The DataSheet to add to the export
 - ***string*** | ***null*** `$sheetTitle` - Optional Title to give the data export.
@@ -109,12 +109,12 @@ If excluded, the name will be left to the engine.
 #### Method: DataExport->export
 
 ```php
-function export([ $outputStream = null]) : void
+function export($outputStream = null): void
 ```
 
 Trigger the final export process.
 
-##### Parameters:
+##### Parameters
 
 - ***resource*** | ***null*** `$outputStream` - The stream resource to export to.
 NULL will open a php://output resource.
@@ -126,12 +126,12 @@ NULL will open a php://output resource.
 #### Method: DataSheet->__construct
 
 ```php
-function __construct([ ?string $name = null])
+function __construct(?string $name = null)
 ```
 
 DataSheet is the representation of a Worksheet
 
-##### Parameters:
+##### Parameters
 
 - ***string*** | ***null*** `$name` - The name to give the sheet. The use is Engine implementation specific but is likely
 filename or Sheet name
@@ -141,7 +141,7 @@ filename or Sheet name
 #### Method: DataSheet->getName
 
 ```php
-function getName() : ?string
+function getName(): ?string
 ```
 
 Get the name of the sheet. Use thereof is Engine Specific
@@ -151,12 +151,12 @@ Get the name of the sheet. Use thereof is Engine Specific
 #### Method: DataSheet->addRow
 
 ```php
-function addRow(array $row) : void
+function addRow(array $row): void
 ```
 
 Append a row worth of data to the end of the Worksheet.
 
-##### Parameters:
+##### Parameters
 
 - ***mixed[]*** `$row` - An array of scalars.
 
@@ -167,12 +167,12 @@ Append a row worth of data to the end of the Worksheet.
 #### Method: DataSheet->addRows
 
 ```php
-function addRows($dataSet) : void
+function addRows($dataSet): void
 ```
 
 Append multiple rows of data to the end of the Worksheet.
 
-##### Parameters:
+##### Parameters
 
 - ***iterable<mixed[]>*** `$dataSet` - An iterable of arrays of scalars.
 
@@ -181,7 +181,7 @@ Append multiple rows of data to the end of the Worksheet.
 #### Method: DataSheet->current
 
 ```php
-function current() : ?array
+function current(): ?array
 ```
 
 Return the current value
@@ -191,7 +191,7 @@ Return the current value
 #### Method: DataSheet->next
 
 ```php
-function next() : void
+function next(): void
 ```
 
 Move forward to next element
@@ -201,7 +201,7 @@ Move forward to next element
 #### Method: DataSheet->key
 
 ```php
-function key() : int
+function key(): int
 ```
 
 Return the key of the current element
@@ -211,7 +211,7 @@ Return the key of the current element
 #### Method: DataSheet->valid
 
 ```php
-function valid() : bool
+function valid(): bool
 ```
 
 Checks if current position is valid
@@ -221,7 +221,7 @@ Checks if current position is valid
 #### Method: DataSheet->rewind
 
 ```php
-function rewind() : void
+function rewind(): void
 ```
 
 Rewind the Iterator to the first element
@@ -250,7 +250,7 @@ class CsvEngine {
 #### Method: CsvEngine->__construct
 
 ```php
-function __construct([ string $outputEncoding = self::UTF16LE [, ?string $delimiter = null [, string $enclosure = '"' [, string $inputEncoding = self::UTF8]]]])
+function __construct(string $outputEncoding = self::UTF16LE, ?string $delimiter = null, string $enclosure = '"', string $inputEncoding = self::UTF8)
 ```
 
 The default and highly recommended export format for CSV tab delimited UTF-16LE with leading Byte Order Mark.  
@@ -261,7 +261,7 @@ While this may seem like an odd choice, the reason for this is cross platform Mi
 
 - https://donatstudios.com/CSV-An-Encoding-Nightmare
 
-##### Parameters:
+##### Parameters
 
 - ***string*** `$outputEncoding` - The encoding to output. Defaults to UTF-16LE as it is by far the best supported by Excel
 - ***string*** | ***null*** `$delimiter` - Character to use as Delimiter. Default varies based on encoding.
@@ -273,7 +273,7 @@ While this may seem like an odd choice, the reason for this is cross platform Mi
 #### Method: CsvEngine->setEnclosure
 
 ```php
-function setEnclosure(string $enclosure) : void
+function setEnclosure(string $enclosure): void
 ```
 
 Character to use as CSV value enclosure. Commonly this will be `"`
@@ -283,7 +283,7 @@ Character to use as CSV value enclosure. Commonly this will be `"`
 #### Method: CsvEngine->setTmpDir
 
 ```php
-function setTmpDir(string $tmpDir) : void
+function setTmpDir(string $tmpDir): void
 ```
 
 Set the tmpDir to write interim files to.  
@@ -295,7 +295,7 @@ Defaults to `sys_get_temp_dir`
 #### Method: CsvEngine->getMultiSheetStrategy
 
 ```php
-function getMultiSheetStrategy() : string
+function getMultiSheetStrategy(): string
 ```
 
 Get the current strategy for Multi-Sheet export
@@ -305,7 +305,7 @@ Get the current strategy for Multi-Sheet export
 #### Method: CsvEngine->setMultiSheetStrategy
 
 ```php
-function setMultiSheetStrategy(string $multiSheetStrategy) : void
+function setMultiSheetStrategy(string $multiSheetStrategy): void
 ```
 
 Set the strategy for allowing multiple sheets.  
@@ -315,7 +315,7 @@ Supported strategies are `CsvEngine::STRATEGY_ZIP` and `CsvEngine::STRATEGY_CONC
 - `CsvEngine::STRATEGY_ZIP` will output a single zipfile containing every sheet as a separate CSV file.  
 - `CsvEngine::STRATEGY_CONCAT` will output a single CSV file with every sheet one after the next.
 
-##### Parameters:
+##### Parameters
 
 - ***string*** `$multiSheetStrategy` - Use the constant `CsvEngine::STRATEGY_ZIP` or `CsvEngine::STRATEGY_CONCAT`
 
@@ -324,7 +324,7 @@ Supported strategies are `CsvEngine::STRATEGY_ZIP` and `CsvEngine::STRATEGY_CONC
 #### Method: CsvEngine->getDelimiter
 
 ```php
-function getDelimiter() : string
+function getDelimiter(): string
 ```
 
 Gets delimiter.  If unset, UTF-16 and UTF-32 default to TAB "\t", everything else to COMMA ","
@@ -334,12 +334,12 @@ Gets delimiter.  If unset, UTF-16 and UTF-32 default to TAB "\t", everything els
 #### Method: CsvEngine->setDelimiter
 
 ```php
-function setDelimiter(?string $delimiter) : void
+function setDelimiter(?string $delimiter): void
 ```
 
 Sets delimiter. Setting to NULL triggers automatic delimiter decision based on recommended encoding rules.
 
-##### Parameters:
+##### Parameters
 
 - ***string*** | ***null*** `$delimiter` - Delimiter Character. Must be a single byte.
 
@@ -348,7 +348,7 @@ Sets delimiter. Setting to NULL triggers automatic delimiter decision based on r
 #### Method: CsvEngine->getEnclosure
 
 ```php
-function getEnclosure() : string
+function getEnclosure(): string
 ```
 
 Get the current character used for enclosure.
@@ -358,7 +358,7 @@ Get the current character used for enclosure.
 #### Method: CsvEngine->disableBom
 
 ```php
-function disableBom([ bool $disable = true]) : void
+function disableBom(bool $disable = true): void
 ```
 
 Whether to disable the leading Byte Order Mark for the given encoding from being output.
@@ -370,10 +370,10 @@ Whether to disable the leading Byte Order Mark for the given encoding from being
 #### Method: SpreadsheetMLEngine->setCreatedTime
 
 ```php
-function setCreatedTime(?int $createdTime) : void
+function setCreatedTime(?int $createdTime): void
 ```
 
-##### Parameters:
+##### Parameters
 
 - ***int*** | ***null*** `$createdTime` - The timestamp to use for the created time. If null, the current time will be used.
 

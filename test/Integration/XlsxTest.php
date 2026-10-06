@@ -11,7 +11,7 @@ class XlsxTest extends TestCase {
 
 	public function test_Xlsx() : void {
 		$engine = new XlsxEngine;
-		$engine->setCreatedTime(518395400);
+		$engine->setCreatedTime(0);
 		$export = new DataExport($engine);
 
 		$firstSheet = new DataSheet('First & Last');
@@ -67,10 +67,20 @@ class XlsxTest extends TestCase {
 		$coreProperties = $this->xmlDocument($zip->getFromName('docProps/core.xml'));
 		$corePropertiesXPath = new \DOMXPath($coreProperties);
 		$corePropertiesXPath->registerNamespace('dcterms', 'http://purl.org/dc/terms/');
-		$this->assertSame('1986-06-05T22:43:20Z', $corePropertiesXPath->evaluate('string(/*/dcterms:created)'));
+		$this->assertSame('1970-01-01T00:00:00Z', $corePropertiesXPath->evaluate('string(/*/dcterms:created)'));
 
 		$zip->close();
 		fclose($temp);
+
+		$repeatTemp = tmpfile();
+		$repeatMeta = stream_get_meta_data($repeatTemp);
+		$export->export($repeatTemp);
+		fflush($repeatTemp);
+		$repeatZip = new \ZipArchive;
+		$this->assertSame(true, $repeatZip->open($repeatMeta['uri']) === true);
+		$this->assertSame(8, $repeatZip->numFiles);
+		$repeatZip->close();
+		fclose($repeatTemp);
 	}
 
 	private function xmlDocument( string $xml ) : \DOMDocument {

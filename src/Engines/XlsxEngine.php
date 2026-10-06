@@ -34,14 +34,18 @@ class XlsxEngine implements EngineInterface {
 	protected ?int $createdTime = null;
 
 	public function processSheet( DataSheet $sheet ) : void {
-		$outputStream = fopen('php://temp', 'r+');
+		$outputStream = $this->temporaryStream();
 		$worksheet = $this->newDocument();
 		$worksheetRoot = $worksheet->createElementNS(self::SPREADSHEET_NAMESPACE, 'worksheet');
 		$worksheet->appendChild($worksheetRoot);
 		$sheetData = $this->appendElement($worksheet, $worksheetRoot, self::SPREADSHEET_NAMESPACE, 'sheetData');
 		$this->appendElement($worksheet, $sheetData, self::SPREADSHEET_NAMESPACE, 'Replace_This_Element_With_Rows');
-		$documentParts = preg_split('%(?:</?Replace_This_Element_With_Rows/?>){1,2}%', $worksheet->saveXML());
-		fwrite($outputStream, $documentParts[0]);
+		$documentParts = preg_split('%(?:</?Replace_This_Element_With_Rows/?>){1,2}%', $this->documentXml($worksheet));
+		if( $documentParts === false || !isset($documentParts[0], $documentParts[1]) ) {
+			throw new \RuntimeException('Unable to split worksheet XML');
+		}
+
+		$this->write($outputStream, $documentParts[0]);
 
 		$rowIndex = 1;
 		foreach( $sheet as $dataRow ) {
@@ -77,11 +81,11 @@ class XlsxEngine implements EngineInterface {
 				$columnIndex++;
 			}
 
-			fwrite($outputStream, $rowDocument->saveXML($row));
+			$this->write($outputStream, $this->documentXml($rowDocument, $row));
 			$rowIndex++;
 		}
 
-		fwrite($outputStream, end($documentParts));
+		$this->write($outputStream, $documentParts[1]);
 
 		$this->worksheetData[] = [
 			'name'   => $sheet->getName() ?: 'Sheet' . ($this->autoIndex++),
@@ -97,31 +101,35 @@ class XlsxEngine implements EngineInterface {
 		$options->setOutputStream($outputStream);
 		$zip = new ZipStream('export.xlsx', $options);
 
-		$zip->addFile('[Content_Types].xml', $this->contentTypesXml());
-		$zip->addFile('_rels/.rels', $this->rootRelationshipsXml());
-		$zip->addFile('docProps/core.xml', $this->corePropertiesXml());
-		$zip->addFile('xl/workbook.xml', $this->workbookXml());
-		$zip->addFile('xl/_rels/workbook.xml.rels', $this->workbookRelationshipsXml());
-		$zip->addFile('xl/styles.xml', $this->stylesXml());
-
-		foreach( $this->worksheetData as $index => $sheetData ) {
-			rewind($sheetData['stream']);
-			$zip->addFileFromStream('xl/worksheets/sheet' . ($index + 1) . '.xml', $sheetData['stream']);
-		}
-
 		try {
+			$zip->addFile('[Content_Types].xml', $this->contentTypesXml());
+			$zip->addFile('_rels/.rels', $this->rootRelationshipsXml());
+			$zip->addFile('docProps/core.xml', $this->corePropertiesXml());
+			$zip->addFile('xl/workbook.xml', $this->workbookXml());
+			$zip->addFile('xl/_rels/workbook.xml.rels', $this->workbookRelationshipsXml());
+			$zip->addFile('xl/styles.xml', $this->stylesXml());
+
+			foreach( $this->worksheetData as $index => $sheetData ) {
+				rewind($sheetData['stream']);
+				$zip->addFileFromStream('xl/worksheets/sheet' . ($index + 1) . '.xml', $sheetData['stream']);
+			}
+
 			$zip->finish();
 		}catch( OverflowException $exception ) {
 			throw new OutputException('Zip Overflow', $exception->getCode(), $exception);
+		}finally {
+			foreach( $this->worksheetData as $sheetData ) {
+				if( is_resource($sheetData['stream']) ) {
+					fclose($sheetData['stream']);
+				}
+			}
+
+			$this->worksheetData = [];
 		}
 	}
 
-	private function not_null( $value ) : bool {
-		if( is_array($value) ) {
-			return sizeof($value) > 0;
-		}
-
-		return (is_string($value) || is_int($value)) && ($value != '') && ($value != 'NULL') && (strlen(trim($value)) > 0);
+	private function not_null( string $value ) : bool {
+		return $value != '' && $value != 'NULL' && strlen(trim($value)) > 0;
 	}
 
 	private function columnReference( int $columnIndex ) : string {
@@ -139,6 +147,36 @@ class XlsxEngine implements EngineInterface {
 
 	private function newDocument() : \DOMDocument {
 		return new \DOMDocument('1.0', 'UTF-8');
+	}
+
+	/**
+	 * @return resource
+	 */
+	private function temporaryStream() {
+		$stream = fopen('php://temp', 'r+');
+		if( !is_resource($stream) ) {
+			throw new \RuntimeException('Unable to open temporary worksheet stream');
+		}
+
+		return $stream;
+	}
+
+	private function documentXml( \DOMDocument $document, ?\DOMNode $node = null ) : string {
+		$xml = $node === null ? $document->saveXML() : $document->saveXML($node);
+		if( $xml === false ) {
+			throw new \RuntimeException('Unable to serialize XML document');
+		}
+
+		return $xml;
+	}
+
+	/**
+	 * @param resource $stream
+	 */
+	private function write( $stream, string $data ) : void {
+		if( fwrite($stream, $data) === false ) {
+			throw new \RuntimeException('Unable to write worksheet XML');
+		}
 	}
 
 	/**
@@ -194,7 +232,7 @@ class XlsxEngine implements EngineInterface {
 			]);
 		}
 
-		return $document->saveXML();
+		return $this->documentXml($document);
 	}
 
 	private function rootRelationshipsXml() : string {
@@ -212,7 +250,7 @@ class XlsxEngine implements EngineInterface {
 			'Target' => 'docProps/core.xml',
 		]);
 
-		return $document->saveXML();
+		return $this->documentXml($document);
 	}
 
 	private function corePropertiesXml() : string {
@@ -222,14 +260,14 @@ class XlsxEngine implements EngineInterface {
 		$coreProperties->setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns:xsi', self::XML_SCHEMA_INSTANCE_NAMESPACE);
 		$document->appendChild($coreProperties);
 
-		$createdTime = gmdate('Y-m-d\TH:i:s\Z', $this->createdTime ?: time());
+		$createdTime = gmdate('Y-m-d\TH:i:s\Z', $this->createdTime ?? time());
 		foreach( [ 'created', 'modified' ] as $property ) {
 			$date = $this->appendElement($document, $coreProperties, self::DCTERMS_NAMESPACE, 'dcterms:' . $property);
 			$date->setAttributeNS(self::XML_SCHEMA_INSTANCE_NAMESPACE, 'xsi:type', 'dcterms:W3CDTF');
 			$date->appendChild($document->createTextNode($createdTime));
 		}
 
-		return $document->saveXML();
+		return $this->documentXml($document);
 	}
 
 	private function workbookXml() : string {
@@ -248,7 +286,7 @@ class XlsxEngine implements EngineInterface {
 			$sheet->setAttributeNS(self::WORKBOOK_RELATIONSHIPS_NAMESPACE, 'r:id', 'rId' . $sheetIndex);
 		}
 
-		return $document->saveXML();
+		return $this->documentXml($document);
 	}
 
 	private function workbookRelationshipsXml() : string {
@@ -271,7 +309,7 @@ class XlsxEngine implements EngineInterface {
 			'Target' => 'styles.xml',
 		]);
 
-		return $document->saveXML();
+		return $this->documentXml($document);
 	}
 
 	private function stylesXml() : string {
@@ -323,7 +361,7 @@ class XlsxEngine implements EngineInterface {
 			'builtinId' => '0',
 		]);
 
-		return $document->saveXML();
+		return $this->documentXml($document);
 	}
 
 	/**

@@ -34,6 +34,7 @@ class XlsxEngine implements EngineInterface {
 	protected ?int $createdTime = null;
 
 	public function processSheet( DataSheet $sheet ) : void {
+		$worksheetName = $this->worksheetName($sheet);
 		$outputStream = $this->temporaryStream();
 		$worksheet = $this->newDocument();
 		$worksheetRoot = $worksheet->createElementNS(self::SPREADSHEET_NAMESPACE, 'worksheet');
@@ -88,7 +89,7 @@ class XlsxEngine implements EngineInterface {
 		$this->write($outputStream, $documentParts[1]);
 
 		$this->worksheetData[] = [
-			'name'   => $sheet->getName() ?: 'Sheet' . ($this->autoIndex++),
+			'name'   => $worksheetName,
 			'stream' => $outputStream,
 		];
 	}
@@ -143,6 +144,48 @@ class XlsxEngine implements EngineInterface {
 		}
 
 		return $reference;
+	}
+
+	private function worksheetName( DataSheet $sheet ) : string {
+		$name = $sheet->getName();
+		if( $name === null || $name === '' ) {
+			do {
+				$name = 'Sheet' . $this->autoIndex++;
+			} while( $this->worksheetNameExists($name) );
+		}
+
+		if( !mb_check_encoding($name, 'UTF-8') ) {
+			throw new \InvalidArgumentException('Worksheet name must be UTF-8');
+		}
+
+		if( trim($name) === '' || mb_strlen($name, 'UTF-8') > 31 ) {
+			throw new \InvalidArgumentException('Worksheet name must contain 1 to 31 characters');
+		}
+
+		if( strpbrk($name, '[]:*?/\\') !== false || preg_match('/[\x00-\x1F]/', $name) === 1 ) {
+			throw new \InvalidArgumentException('Worksheet name contains invalid characters');
+		}
+
+		if( $name[0] === "'" || substr($name, -1) === "'" ) {
+			throw new \InvalidArgumentException('Worksheet name cannot begin or end with an apostrophe');
+		}
+
+		if( $this->worksheetNameExists($name) ) {
+			throw new \InvalidArgumentException('Worksheet names must be unique');
+		}
+
+		return $name;
+	}
+
+	private function worksheetNameExists( string $name ) : bool {
+		$name = mb_strtolower($name, 'UTF-8');
+		foreach( $this->worksheetData as $sheetData ) {
+			if( mb_strtolower($sheetData['name'], 'UTF-8') === $name ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	private function newDocument() : \DOMDocument {

@@ -83,6 +83,51 @@ class XlsxTest extends TestCase {
 		fclose($repeatTemp);
 	}
 
+	public function test_XlsxRejectsInvalidWorksheetNames() : void {
+		foreach( [
+			' ',
+			str_repeat('a', 32),
+			"'quoted'",
+			'not/valid',
+		] as $name ) {
+			$engine = new XlsxEngine;
+
+			try {
+				$engine->processSheet(new DataSheet($name));
+				$this->fail('Expected an invalid worksheet name to throw');
+			}catch( \InvalidArgumentException $exception ) {
+				$this->assertNotSame('', $exception->getMessage());
+			}
+		}
+	}
+
+	public function test_XlsxRejectsDuplicateWorksheetNames() : void {
+		$engine = new XlsxEngine;
+		$engine->processSheet(new DataSheet('Sales'));
+
+		$this->expectException(\InvalidArgumentException::class);
+		$engine->processSheet(new DataSheet('sales'));
+	}
+
+	public function test_XlsxAvoidsAutomaticWorksheetNameCollisions() : void {
+		$engine = new XlsxEngine;
+		$engine->processSheet(new DataSheet('Sheet1'));
+		$engine->processSheet(new DataSheet);
+
+		$temp = tmpfile();
+		$meta = stream_get_meta_data($temp);
+		$engine->outputToStream($temp);
+		fflush($temp);
+		$zip = new \ZipArchive;
+		$this->assertSame(true, $zip->open($meta['uri']) === true);
+		$workbook = $this->xmlDocument($zip->getFromName('xl/workbook.xml'));
+		$workbookXPath = new \DOMXPath($workbook);
+		$workbookXPath->registerNamespace('x', 'http://schemas.openxmlformats.org/spreadsheetml/2006/main');
+		$this->assertSame('Sheet2', $workbookXPath->evaluate('string(/x:workbook/x:sheets/x:sheet[2]/@name)'));
+		$zip->close();
+		fclose($temp);
+	}
+
 	private function xmlDocument( string $xml ) : \DOMDocument {
 		$document = new \DOMDocument;
 		$this->assertTrue($document->loadXML($xml));

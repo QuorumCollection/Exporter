@@ -92,7 +92,10 @@ DataExport is the object used to orchestrate the export process regardless of ex
 #### Method: DataExport->addSheet
 
 ```php
-function addSheet(\Quorum\Exporter\DataSheet $sheet, ?string $sheetTitle = null): void
+function addSheet(
+	\Quorum\Exporter\DataSheet $sheet,
+	?string $sheetTitle = null,
+): void
 ```
 
 Add a Data Sheet to the export.
@@ -250,7 +253,12 @@ class CsvEngine {
 #### Method: CsvEngine->__construct
 
 ```php
-function __construct(string $outputEncoding = self::UTF16LE, ?string $delimiter = null, string $enclosure = '"', string $inputEncoding = self::UTF8)
+function __construct(
+	string $outputEncoding = self::UTF16LE,
+	?string $delimiter = null,
+	string $enclosure = '"',
+	string $inputEncoding = self::UTF8,
+)
 ```
 
 The default and highly recommended export format for CSV tab delimited UTF-16LE with leading Byte Order Mark.  

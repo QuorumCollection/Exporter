@@ -1,6 +1,7 @@
 <mddoc>
 
-	<docpage target="README.md" autoloader="psr4" autoloader-root-namespace="Quorum\Exporter" autoloader-root="src">
+	<autoloader type="composer"/>
+	<docpage target="README.md">
 
         <section title="Exporter">
 			<badge-poser type="version" />

@@ -28,7 +28,7 @@ class DataExport {
 	 *                                Most Engines will interpret this as filename (sans file extension).
 	 *                                If excluded, the name will be left to the engine.
 	 */
-	public function addSheet( DataSheet $sheet, ?string $sheetTitle = null ) : void {
+	public function addSheet( DataSheet $sheet, ?string $sheetTitle = null ): void {
 		if( is_string($sheetTitle) ) {
 			$this->dataSheets[$sheetTitle] = $sheet;
 		} else {
@@ -42,7 +42,7 @@ class DataExport {
 	 * @param resource|null $outputStream The stream resource to export to.
 	 *                                    NULL will open a php://output resource.
 	 */
-	public function export( $outputStream = null ) : void {
+	public function export( $outputStream = null ): void {
 		if( $outputStream === null ) {
 			$outputStream = fopen('php://output', 'w');
 		}

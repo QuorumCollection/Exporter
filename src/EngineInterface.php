@@ -7,12 +7,12 @@ interface EngineInterface {
 	/**
 	 * @access private
 	 */
-	public function processSheet( DataSheet $sheet ) : void;
+	public function processSheet( DataSheet $sheet ): void;
 
 	/**
 	 * @param resource $outputStream
 	 * @access private
 	 */
-	public function outputToStream( $outputStream ) : void;
+	public function outputToStream( $outputStream ): void;
 
 }

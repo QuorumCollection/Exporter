@@ -14,7 +14,7 @@ class SpreadsheetMLEngine implements EngineInterface {
 
 	protected ?int $createdTime = null;
 
-	public function processSheet( DataSheet $sheet ) : void {
+	public function processSheet( DataSheet $sheet ): void {
 		$outputStream = fopen("php://temp", "r+");
 		if( $outputStream === false ) {
 			throw new \RuntimeException('Unable to open temporary output stream');
@@ -72,7 +72,7 @@ class SpreadsheetMLEngine implements EngineInterface {
 		];
 	}
 
-	public function outputToStream( $outputStream ) : void {
+	public function outputToStream( $outputStream ): void {
 		$baseXml = $this->generateBaseXmlDocument();
 
 		$splitDocument = preg_split('%(?:</?Replace_This_Element_With_Worksheet\d+/?>){1,2}%', $baseXml);
@@ -99,11 +99,11 @@ class SpreadsheetMLEngine implements EngineInterface {
 		fwrite($outputStream, $finalDocumentPart);
 	}
 
-	private function not_null( string $value ) : bool {
+	private function not_null( string $value ): bool {
 		return $value != '' && $value != 'NULL' && strlen(trim($value)) > 0;
 	}
 
-	protected function generateBaseXmlDocument() : string {
+	protected function generateBaseXmlDocument(): string {
 		$doc = new \DOMDocument;
 //		$doc->formatOutput = true;
 		$doc->appendChild($doc->createProcessingInstruction('mso-application', 'progid="Excel.Sheet"'));
@@ -184,7 +184,7 @@ class SpreadsheetMLEngine implements EngineInterface {
 	/**
 	 * @param int|null $createdTime The timestamp to use for the created time. If null, the current time will be used.
 	 */
-	public function setCreatedTime( ?int $createdTime ) : void {
+	public function setCreatedTime( ?int $createdTime ): void {
 		$this->createdTime = $createdTime;
 	}
 

@@ -12,7 +12,7 @@ class CsvIntegrationTest extends TestCase {
 	/**
 	 * @dataProvider encodingProvider
 	 */
-	public function test_csv( string $encoding ) : void {
+	public function test_csv( string $encoding ): void {
 		$export = new DataExport(new CsvEngine($encoding));
 		$sheet  = new DataSheet;
 		$export->addSheet($sheet);
@@ -31,7 +31,7 @@ class CsvIntegrationTest extends TestCase {
 		fclose($temp);
 	}
 
-	public function encodingProvider() : array {
+	public function encodingProvider(): array {
 		return [
 			[ CsvEngine::UTF8 ],
 			[ CsvEngine::UTF16BE ],

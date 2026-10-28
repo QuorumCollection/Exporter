@@ -9,8 +9,6 @@ $finder = PhpCsFixer\Finder::create()
 
 $config = Corpus\PhpCsFixer\Config::php7x4();
 
-if( method_exists($config, 'setUnsupportedPhpVersionAllowed') ) {
-	$config->setUnsupportedPhpVersionAllowed(true);
-}
+$config->setUnsupportedPhpVersionAllowed(true);
 
 return $config->setFinder($finder);

@@ -9,9 +9,7 @@ use Quorum\Exporter\Engines\CsvEngine;
 
 class CsvIntegrationTest extends TestCase {
 
-	/**
-	 * @dataProvider encodingProvider
-	 */
+	#[\PHPUnit\Framework\Attributes\DataProvider('encodingProvider')]
 	public function test_csv( string $encoding ): void {
 		$export = new DataExport(new CsvEngine($encoding));
 		$sheet  = new DataSheet;
@@ -31,7 +29,7 @@ class CsvIntegrationTest extends TestCase {
 		fclose($temp);
 	}
 
-	public function encodingProvider(): array {
+	public static function encodingProvider(): array {
 		return [
 			[ CsvEngine::UTF8 ],
 			[ CsvEngine::UTF16BE ],

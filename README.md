@@ -22,7 +22,7 @@ Supported formats:
 - **ext-mbstring**: *
 - **ext-dom**: *
 - **ext-json**: *
-- **php**: >=7.4
+- **php**: >=8.1
 
 ## Installing
 

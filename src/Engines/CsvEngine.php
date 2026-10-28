@@ -61,7 +61,7 @@ class CsvEngine implements EngineInterface {
 		string $outputEncoding = self::UTF16LE,
 		?string $delimiter = null,
 		string $enclosure = '"',
-		string $inputEncoding = self::UTF8
+		string $inputEncoding = self::UTF8,
 	) {
 		$this->setDelimiter($delimiter);
 		$this->setEnclosure($enclosure);
@@ -173,7 +173,7 @@ class CsvEngine implements EngineInterface {
 	/**
 	 * @throws OutputException
 	 */
-	public function outputToStream( $outputStream ): void {
+	public function outputToStream( mixed $outputStream ): void {
 
 		switch( $this->multiSheetStrategy ) {
 			case self::STRATEGY_ZIP:

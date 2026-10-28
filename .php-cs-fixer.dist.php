@@ -7,7 +7,11 @@ $finder = PhpCsFixer\Finder::create()
 	->in(__DIR__ . '/example')
 	->name('*.php');
 
-$config = Corpus\PhpCsFixer\Config::php7x4();
+$config = Corpus\PhpCsFixer\Config::php8x1();
+
+$config->setRules(array_merge($config->getRules(), [
+	'@PHPUnit10x0Migration:risky' => true,
+]));
 
 $config->setUnsupportedPhpVersionAllowed(true);
 

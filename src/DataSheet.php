@@ -12,7 +12,6 @@ class DataSheet implements \Iterator {
 	/** @var resource */
 	protected $tmpStream;
 
-	protected ?string $name;
 	/** The row counter. */
 	protected int $rowIndex = 0;
 	/** @var array<int|string, string>|null The current iterator value */
@@ -24,9 +23,7 @@ class DataSheet implements \Iterator {
 	 * @param string|null $name The name to give the sheet. The use is Engine implementation specific but is likely
 	 *                          filename or Sheet name
 	 */
-	public function __construct( ?string $name = null ) {
-		$this->name = $name;
-
+	public function __construct( protected ?string $name = null ) {
 		$tmpStream = fopen("php://temp", "r+");
 		if( $tmpStream === false ) {
 			throw new \RuntimeException('Unable to open temporary stream');
@@ -70,7 +67,7 @@ class DataSheet implements \Iterator {
 	 *
 	 * @param iterable<array<mixed>> $dataSet An iterable of arrays of scalars.
 	 */
-	public function addRows( $dataSet ): void {
+	public function addRows( mixed $dataSet ): void {
 		foreach( $dataSet as $row ) {
 			$this->addRow($row);
 		}

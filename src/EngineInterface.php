@@ -13,6 +13,6 @@ interface EngineInterface {
 	 * @param resource $outputStream
 	 * @access private
 	 */
-	public function outputToStream( $outputStream ): void;
+	public function outputToStream( mixed $outputStream ): void;
 
 }

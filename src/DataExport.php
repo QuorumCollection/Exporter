@@ -9,15 +9,12 @@ class DataExport {
 	/** @var DataSheet[] */
 	protected array $dataSheets = [];
 
-	protected EngineInterface $engine;
-
 	/**
 	 * DataExport is the object used to orchestrate the export process regardless of export format.
 	 *
 	 * @param \Quorum\Exporter\EngineInterface $engine The engine by which to export the data sheets.
 	 */
-	public function __construct( EngineInterface $engine ) {
-		$this->engine = $engine;
+	public function __construct( protected EngineInterface $engine ) {
 	}
 
 	/**
@@ -42,7 +39,7 @@ class DataExport {
 	 * @param resource|null $outputStream The stream resource to export to.
 	 *                                    NULL will open a php://output resource.
 	 */
-	public function export( $outputStream = null ): void {
+	public function export( mixed $outputStream = null ): void {
 		if( $outputStream === null ) {
 			$outputStream = fopen('php://output', 'w');
 		}

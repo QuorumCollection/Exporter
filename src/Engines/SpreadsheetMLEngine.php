@@ -40,7 +40,7 @@ class SpreadsheetMLEngine implements EngineInterface {
 					$cellData->setAttribute('ss:Type', is_numeric($value) ? 'Number' : 'String');
 					$cellData->appendChild($doc->createTextNode($value));
 					$rowCell->appendChild($cellData);
-					if( stripos($value, "\n") !== false ) {
+					if( str_contains($value, "\n") ) {
 						$rowCell->setAttribute('ss:StyleID', 's22');
 					}
 
@@ -72,7 +72,7 @@ class SpreadsheetMLEngine implements EngineInterface {
 		];
 	}
 
-	public function outputToStream( $outputStream ): void {
+	public function outputToStream( mixed $outputStream ): void {
 		$baseXml = $this->generateBaseXmlDocument();
 
 		$splitDocument = preg_split('%(?:</?Replace_This_Element_With_Worksheet\d+/?>){1,2}%', $baseXml);

@@ -72,7 +72,7 @@ class CsvEngine implements EngineInterface {
 	/**
 	 * Character to use as CSV value enclosure. Commonly this will be `"`
 	 */
-	public function setEnclosure( string $enclosure ) : void {
+	public function setEnclosure( string $enclosure ): void {
 		if( strlen($enclosure) !== 1 ) {
 			throw new \InvalidArgumentException('Enclosure must be exactly one byte');
 		}
@@ -80,7 +80,7 @@ class CsvEngine implements EngineInterface {
 		$this->enclosure = $enclosure;
 	}
 
-	protected function setOutputEncoding( string $outputEncoding ) : void {
+	protected function setOutputEncoding( string $outputEncoding ): void {
 		if( !in_array($outputEncoding, mb_list_encodings(), true) ) {
 			throw new \InvalidArgumentException('Invalid Encoding');
 		}
@@ -88,7 +88,7 @@ class CsvEngine implements EngineInterface {
 		$this->outputEncoding = $outputEncoding;
 	}
 
-	protected function setInputEncoding( string $inputEncoding ) : void {
+	protected function setInputEncoding( string $inputEncoding ): void {
 		if( !in_array($inputEncoding, mb_list_encodings()) ) {
 			throw new \InvalidArgumentException('Invalid Encoding');
 		}
@@ -101,14 +101,14 @@ class CsvEngine implements EngineInterface {
 	 *
 	 * Defaults to `sys_get_temp_dir`
 	 */
-	public function setTmpDir( string $tmpDir ) : void {
+	public function setTmpDir( string $tmpDir ): void {
 		$this->tmpDir = $tmpDir;
 	}
 
 	/**
 	 * Get the current strategy for Multi-Sheet export
 	 */
-	public function getMultiSheetStrategy() : string {
+	public function getMultiSheetStrategy(): string {
 		return $this->multiSheetStrategy;
 	}
 
@@ -122,7 +122,7 @@ class CsvEngine implements EngineInterface {
 	 *
 	 * @param string $multiSheetStrategy Use the constant `CsvEngine::STRATEGY_ZIP` or `CsvEngine::STRATEGY_CONCAT`
 	 */
-	public function setMultiSheetStrategy( string $multiSheetStrategy ) : void {
+	public function setMultiSheetStrategy( string $multiSheetStrategy ): void {
 		if( !in_array($multiSheetStrategy, [ self::STRATEGY_ZIP, self::STRATEGY_CONCAT ]) ) {
 			throw new \InvalidArgumentException('Invalid MultiSheet Strategy');
 		}
@@ -130,7 +130,7 @@ class CsvEngine implements EngineInterface {
 		$this->multiSheetStrategy = $multiSheetStrategy;
 	}
 
-	public function processSheet( DataSheet $sheet ) : void {
+	public function processSheet( DataSheet $sheet ): void {
 		$outputStream = fopen("php://temp", "r+");
 		if( $outputStream === false ) {
 			throw new OutputException('Unable to open temporary output stream');
@@ -173,7 +173,7 @@ class CsvEngine implements EngineInterface {
 	/**
 	 * @throws OutputException
 	 */
-	public function outputToStream( $outputStream ) : void {
+	public function outputToStream( $outputStream ): void {
 
 		switch( $this->multiSheetStrategy ) {
 			case self::STRATEGY_ZIP:
@@ -224,7 +224,7 @@ class CsvEngine implements EngineInterface {
 	/**
 	 * Gets delimiter.  If unset, UTF-16 and UTF-32 default to TAB "\t", everything else to COMMA ","
 	 */
-	public function getDelimiter() : string {
+	public function getDelimiter(): string {
 		if( $this->delimiter === null ) {
 			if( stripos($this->outputEncoding, self::UTF16) === 0 || stripos($this->outputEncoding, self::UTF32) === 0 ) {
 				return "\t";
@@ -241,7 +241,7 @@ class CsvEngine implements EngineInterface {
 	 *
 	 * @param string|null $delimiter Delimiter Character. Must be a single byte.
 	 */
-	public function setDelimiter( ?string $delimiter ) : void {
+	public function setDelimiter( ?string $delimiter ): void {
 		if( $delimiter !== null && strlen($delimiter) !== 1 ) {
 			throw new \InvalidArgumentException('Delimiter must be exactly one byte');
 		}
@@ -252,11 +252,11 @@ class CsvEngine implements EngineInterface {
 	/**
 	 * Get the current character used for enclosure.
 	 */
-	public function getEnclosure() : string {
+	public function getEnclosure(): string {
 		return $this->enclosure;
 	}
 
-	protected function getBom() : string {
+	protected function getBom(): string {
 		if( $this->disableBom ) {
 			return '';
 		}
@@ -287,14 +287,14 @@ class CsvEngine implements EngineInterface {
 		return '';
 	}
 
-	final protected function isLittleEndian() : bool {
+	final protected function isLittleEndian(): bool {
 		return unpack('S', "\x01\x00") === [ 1 => 1 ];
 	}
 
 	/**
 	 * Whether to disable the leading Byte Order Mark for the given encoding from being output.
 	 */
-	public function disableBom( bool $disable = true ) : void {
+	public function disableBom( bool $disable = true ): void {
 		$this->disableBom = $disable;
 	}
 

@@ -9,7 +9,7 @@ use Quorum\Exporter\Engines\SpreadsheetMLEngine;
 
 class SpreadsheetMLTest extends TestCase {
 
-	public function test_SpreadsheetML() : void {
+	public function test_SpreadsheetML(): void {
 		$engine = new SpreadsheetMLEngine;
 		$engine->setCreatedTime(518395400);
 		$export = new DataExport($engine);

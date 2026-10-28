@@ -38,7 +38,7 @@ class DataSheet implements \Iterator {
 	/**
 	 * Get the name of the sheet. Use thereof is Engine Specific
 	 */
-	public function getName() : ?string {
+	public function getName(): ?string {
 		return $this->name;
 	}
 
@@ -48,7 +48,7 @@ class DataSheet implements \Iterator {
 	 * @param array<mixed> $row An array of scalars.
 	 * @throws InvalidDataTypeException
 	 */
-	public function addRow( array $row ) : void {
+	public function addRow( array $row ): void {
 		foreach( $row as &$col ) {
 			if( !is_scalar($col) && $col !== null ) {
 				throw new InvalidDataTypeException;
@@ -70,7 +70,7 @@ class DataSheet implements \Iterator {
 	 *
 	 * @param iterable<array<mixed>> $dataSet An iterable of arrays of scalars.
 	 */
-	public function addRows( $dataSet ) : void {
+	public function addRows( $dataSet ): void {
 		foreach( $dataSet as $row ) {
 			$this->addRow($row);
 		}
@@ -79,14 +79,14 @@ class DataSheet implements \Iterator {
 	/**
 	 * Return the current value
 	 */
-	public function current() : ?array {
+	public function current(): ?array {
 		return $this->currentValue;
 	}
 
 	/**
 	 * Move forward to next element
 	 */
-	public function next() : void {
+	public function next(): void {
 		$string = fgets($this->tmpStream);
 
 		if( $string === false ) {
@@ -100,7 +100,7 @@ class DataSheet implements \Iterator {
 	/**
 	 * @return array<int|string, string>
 	 */
-	private function decodeRow( string $row ) : array {
+	private function decodeRow( string $row ): array {
 		$decodedRow = json_decode($row, true);
 		if( !is_array($decodedRow) ) {
 			throw new \UnexpectedValueException('Unable to decode row');
@@ -123,21 +123,21 @@ class DataSheet implements \Iterator {
 	 *
 	 * @see http://php.net/manual/en/iterator.key.php
 	 */
-	public function key() : int {
+	public function key(): int {
 		return $this->rowIndex;
 	}
 
 	/**
 	 * Checks if current position is valid
 	 */
-	public function valid() : bool {
+	public function valid(): bool {
 		return $this->currentValue !== null;
 	}
 
 	/**
 	 * Rewind the Iterator to the first element
 	 */
-	public function rewind() : void {
+	public function rewind(): void {
 		$this->rowIndex = 0;
 		rewind($this->tmpStream);
 		$this->next();

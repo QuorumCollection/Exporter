@@ -13,7 +13,7 @@ Supported formats:
 - SpreadsheetML "Excel 2004 XML Spreadsheet"
 - More to come.
 
-ZIP exports require 64-bit PHP and the zlib extension through ZipStream.
+The ZipStream dependency requires 64-bit PHP and the zlib extension.
 
 
 

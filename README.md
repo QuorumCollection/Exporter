@@ -170,10 +170,10 @@ Append a row worth of data to the end of the Worksheet.
 #### Method: DataSheet->addRows
 
 ```php
-function addRows($dataSet): void
+function addRows(iterable $dataSet): void
 ```
 
-Append rows from an iterable or an object with public row properties.
+Append rows from an iterable.
 
 ##### Parameters
 

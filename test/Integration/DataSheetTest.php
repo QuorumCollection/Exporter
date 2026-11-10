@@ -40,18 +40,4 @@ class DataSheetTest extends TestCase {
 		], iterator_to_array($sheet, false));
 	}
 
-	public function test_addRowsAcceptsObjectProperties(): void {
-		$sheet = new DataSheet;
-		$sheet->addRows((object)[
-			'first' => [ 'First', 1 ],
-			'second' => [ 'Second', 2 ],
-		]);
-
-		$this->assertNull($sheet->getName());
-		$this->assertSame([
-			[ 'First', '1' ],
-			[ 'Second', '2' ],
-		], iterator_to_array($sheet, false));
-	}
-
 }

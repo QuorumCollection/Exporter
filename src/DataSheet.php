@@ -67,11 +67,11 @@ class DataSheet implements \Iterator {
 	}
 
 	/**
-	 * Append rows from an iterable or an object with public row properties.
+	 * Append rows from an iterable.
 	 *
 	 * @param iterable<array<int|string, scalar|null>> $dataSet An iterable of rows.
 	 */
-	public function addRows( mixed $dataSet ): void {
+	public function addRows( iterable $dataSet ): void {
 		foreach( $dataSet as $row ) {
 			$this->addRow($row);
 		}

@@ -2,15 +2,13 @@
 
 use Quorum\Exporter\DataExport;
 use Quorum\Exporter\DataSheet;
+use Quorum\Exporter\Engines\Csv\MultiSheetStrategy;
 use Quorum\Exporter\Engines\CsvEngine;
 
 require __DIR__ . '/../vendor/autoload.php';
 
-$csv      = new CsvEngine;
+$csv      = new CsvEngine(multiSheetStrategy: MultiSheetStrategy::ZIP);
 $exporter = new DataExport($csv);
-
-// Output a ZIP of CSV's for Multiple Sheets
-$csv->setMultiSheetStrategy(CsvEngine::STRATEGY_ZIP);
 
 $sheetA = new DataSheet('a');
 $sheetB = new DataSheet('b');

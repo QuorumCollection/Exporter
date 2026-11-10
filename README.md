@@ -43,15 +43,13 @@ composer require 'quorum/exporter'
 
 use Quorum\Exporter\DataExport;
 use Quorum\Exporter\DataSheet;
+use Quorum\Exporter\Engines\Csv\MultiSheetStrategy;
 use Quorum\Exporter\Engines\CsvEngine;
 
 require __DIR__ . '/../vendor/autoload.php';
 
-$csv      = new CsvEngine;
+$csv      = new CsvEngine(multiSheetStrategy: MultiSheetStrategy::ZIP);
 $exporter = new DataExport($csv);
-
-// Output a ZIP of CSV's for Multiple Sheets
-$csv->setMultiSheetStrategy(CsvEngine::STRATEGY_ZIP);
 
 $sheetA = new DataSheet('a');
 $sheetB = new DataSheet('b');
@@ -235,6 +233,40 @@ Rewind the Iterator to the first element
 
 ### Class: Quorum\Exporter\EngineInterface
 
+### Enum: Quorum\Exporter\Engines\Csv\ByteOrderMark
+
+Byte order marks used by CSV output encodings.
+
+```php
+<?php
+namespace Quorum\Exporter\Engines\Csv;
+
+enum ByteOrderMark: string {
+	/** UTF-8 byte order mark: EF BB BF. */
+	case UTF8 = "﻿";
+	case UTF16BE = "\xfe\xff";
+	case UTF16LE = "\xff\xfe";
+	case UTF32BE = "\x00\x00\xfe\xff";
+	case UTF32LE = "\xff\xfe\x00\x00";
+}
+```
+
+### Enum: Quorum\Exporter\Engines\Csv\MultiSheetStrategy
+
+Strategies for exporting multiple CSV sheets.
+
+```php
+<?php
+namespace Quorum\Exporter\Engines\Csv;
+
+enum MultiSheetStrategy {
+	/** Write all sheets to a single CSV file. */
+	case CONCAT;
+	/** Write each sheet to a separate CSV file inside a ZIP archive. */
+	case ZIP;
+}
+```
+
 ### Class: Quorum\Exporter\Engines\CsvEngine
 
 ```php
@@ -242,8 +274,6 @@ Rewind the Iterator to the first element
 namespace Quorum\Exporter\Engines;
 
 class CsvEngine {
-	public const STRATEGY_CONCAT = 'stat-concat';
-	public const STRATEGY_ZIP = 'stat-zip';
 	public const UTF8 = 'UTF-8';
 	public const UTF16 = 'UTF-16';
 	public const UTF16BE = 'UTF-16BE';
@@ -262,6 +292,8 @@ function __construct(
 	?string $delimiter = null,
 	string $enclosure = '"',
 	string $inputEncoding = self::UTF8,
+	?bool $bomEnabled = null,
+	\Quorum\Exporter\Engines\Csv\MultiSheetStrategy $multiSheetStrategy = \Quorum\Exporter\Engines\Csv\MultiSheetStrategy::CONCAT,
 )
 ```
 
@@ -279,6 +311,8 @@ While this may seem like an odd choice, the reason for this is cross platform Mi
 - ***string*** | ***null*** `$delimiter` - Character to use as Delimiter. Default varies based on encoding.
 - ***string*** `$enclosure` - Character to use as Enclosure.
 - ***string*** `$inputEncoding` - The encoding of the input going into the CSVs.
+- ***bool*** | ***null*** `$bomEnabled` - Whether to include a byte order mark. Null disables it for UTF-8 and enables it for other encodings.
+- ***\Quorum\Exporter\Engines\Csv\MultiSheetStrategy*** `$multiSheetStrategy` - How to export multiple sheets. Defaults to concatenation.
 
 ---
 
@@ -305,29 +339,23 @@ Set the directory to check before creating a ZIP export. Defaults to `sys_get_te
 #### Method: CsvEngine->getMultiSheetStrategy
 
 ```php
-function getMultiSheetStrategy(): string
+function getMultiSheetStrategy(
+): \Quorum\Exporter\Engines\Csv\MultiSheetStrategy
 ```
 
-Get the current strategy for Multi-Sheet export
+Get the current multi-sheet strategy.
 
 ---
 
 #### Method: CsvEngine->setMultiSheetStrategy
 
 ```php
-function setMultiSheetStrategy(string $multiSheetStrategy): void
+function setMultiSheetStrategy(
+	\Quorum\Exporter\Engines\Csv\MultiSheetStrategy $multiSheetStrategy,
+): void
 ```
 
-Set the strategy for allowing multiple sheets.  
-  
-Supported strategies are `CsvEngine::STRATEGY_ZIP` and `CsvEngine::STRATEGY_CONCAT`  
-  
-- `CsvEngine::STRATEGY_ZIP` will output a single zipfile containing every sheet as a separate CSV file.  
-- `CsvEngine::STRATEGY_CONCAT` will output a single CSV file with every sheet one after the next.
-
-##### Parameters
-
-- ***string*** `$multiSheetStrategy` - Use the constant `CsvEngine::STRATEGY_ZIP` or `CsvEngine::STRATEGY_CONCAT`
+Set the multi-sheet strategy. ZIP creates an archive. CONCAT writes all sheets to one CSV file.
 
 ---
 
@@ -371,7 +399,7 @@ Get the current character used for enclosure.
 function disableBom(bool $disable = true): void
 ```
 
-Whether to disable the leading Byte Order Mark for the given encoding from being output.
+Enable or disable the leading byte order mark. By default it is disabled for UTF-8 and enabled for other encodings.
 
 ### Class: Quorum\Exporter\Engines\SpreadsheetMLEngine
 

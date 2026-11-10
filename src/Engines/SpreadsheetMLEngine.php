@@ -72,6 +72,9 @@ class SpreadsheetMLEngine implements EngineInterface {
 		];
 	}
 
+	/**
+	 * @param resource $outputStream A writable stream resource.
+	 */
 	public function outputToStream( mixed $outputStream ): void {
 		$baseXml = $this->generateBaseXmlDocument();
 
@@ -182,7 +185,7 @@ class SpreadsheetMLEngine implements EngineInterface {
 	}
 
 	/**
-	 * @param int|null $createdTime The timestamp to use for the created time. If null, the current time will be used.
+	 * @param int|null $createdTime The timestamp to use for the created time. If null or zero, the current time is used.
 	 */
 	public function setCreatedTime( ?int $createdTime ): void {
 		$this->createdTime = $createdTime;

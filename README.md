@@ -103,9 +103,8 @@ Add a Data Sheet to the export.
 ##### Parameters
 
 - ***\Quorum\Exporter\DataSheet*** `$sheet` - The DataSheet to add to the export
-- ***string*** | ***null*** `$sheetTitle` - Optional Title to give the data export.
-Most Engines will interpret this as filename (sans file extension).
-If excluded, the name will be left to the engine.
+- ***string*** | ***null*** `$sheetTitle` - Optional collection key. A later sheet with the same key replaces the earlier one.
+Exported sheet names come from the DataSheet name.
 
 ---
 
@@ -119,8 +118,7 @@ Trigger the final export process.
 
 ##### Parameters
 
-- ***resource*** | ***null*** `$outputStream` - The stream resource to export to.
-NULL will open a php://output resource.
+- ***resource*** | ***null*** `$outputStream` - A writable stream resource. Null opens php://output.
 
 ### Class: Quorum\Exporter\DataSheet
 
@@ -161,7 +159,7 @@ Append a row worth of data to the end of the Worksheet.
 
 ##### Parameters
 
-- ***mixed[]*** `$row` - An array of scalars.
+- ***mixed[]*** `$row` - An array of scalar values or null. Values are converted to strings.
 
 **Throws**: `\Quorum\Exporter\Exceptions\InvalidDataTypeException`
 
@@ -173,11 +171,11 @@ Append a row worth of data to the end of the Worksheet.
 function addRows($dataSet): void
 ```
 
-Append multiple rows of data to the end of the Worksheet.
+Append rows from an iterable or an object with public row properties.
 
 ##### Parameters
 
-- ***iterable<mixed[]>*** `$dataSet` - An iterable of arrays of scalars.
+- ***iterable<mixed[]>*** `$dataSet` - An iterable of rows.
 
 ---
 
@@ -230,6 +228,28 @@ function rewind(): void
 Rewind the Iterator to the first element
 
 ### Class: Quorum\Exporter\EngineInterface
+
+#### Method: EngineInterface->processSheet
+
+```php
+function processSheet(\Quorum\Exporter\DataSheet $sheet): void
+```
+
+Process a sheet for export.
+
+---
+
+#### Method: EngineInterface->outputToStream
+
+```php
+function outputToStream($outputStream): void
+```
+
+Write the processed sheets to a stream.
+
+##### Parameters
+
+- ***resource*** `$outputStream` - A writable stream resource.
 
 ### Class: Quorum\Exporter\Engines\CsvEngine
 
@@ -294,9 +314,7 @@ Character to use as CSV value enclosure. Commonly this will be `"`
 function setTmpDir(string $tmpDir): void
 ```
 
-Set the tmpDir to write interim files to.  
-  
-Defaults to `sys_get_temp_dir`
+Set the directory to check before creating a ZIP export. Defaults to `sys_get_temp_dir`.
 
 ---
 
@@ -326,6 +344,32 @@ Supported strategies are `CsvEngine::STRATEGY_ZIP` and `CsvEngine::STRATEGY_CONC
 ##### Parameters
 
 - ***string*** `$multiSheetStrategy` - Use the constant `CsvEngine::STRATEGY_ZIP` or `CsvEngine::STRATEGY_CONCAT`
+
+---
+
+#### Method: CsvEngine->processSheet
+
+```php
+function processSheet(\Quorum\Exporter\DataSheet $sheet): void
+```
+
+Process a sheet for export.
+
+---
+
+#### Method: CsvEngine->outputToStream
+
+```php
+function outputToStream($outputStream): void
+```
+
+Write the processed sheets to a stream.
+
+##### Parameters
+
+- ***resource*** `$outputStream` - A writable stream resource.
+
+**Throws**: `\Quorum\Exporter\Exceptions\OutputException`
 
 ---
 
@@ -373,6 +417,28 @@ Whether to disable the leading Byte Order Mark for the given encoding from being
 
 ### Class: Quorum\Exporter\Engines\SpreadsheetMLEngine
 
+#### Method: SpreadsheetMLEngine->processSheet
+
+```php
+function processSheet(\Quorum\Exporter\DataSheet $sheet): void
+```
+
+Process a sheet for export.
+
+---
+
+#### Method: SpreadsheetMLEngine->outputToStream
+
+```php
+function outputToStream($outputStream): void
+```
+
+Write the processed sheets to a stream.
+
+##### Parameters
+
+- ***resource*** `$outputStream` - A writable stream resource.
+
 ---
 
 #### Method: SpreadsheetMLEngine->setCreatedTime
@@ -383,7 +449,7 @@ function setCreatedTime(?int $createdTime): void
 
 ##### Parameters
 
-- ***int*** | ***null*** `$createdTime` - The timestamp to use for the created time. If null, the current time will be used.
+- ***int*** | ***null*** `$createdTime` - The timestamp to use for the created time. If null or zero, the current time is used.
 
 ### Class: Quorum\Exporter\Exceptions\ExportException
 

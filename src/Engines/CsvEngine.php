@@ -97,9 +97,7 @@ class CsvEngine implements EngineInterface {
 	}
 
 	/**
-	 * Set the tmpDir to write interim files to.
-	 *
-	 * Defaults to `sys_get_temp_dir`
+	 * Set the directory to check before creating a ZIP export. Defaults to `sys_get_temp_dir`.
 	 */
 	public function setTmpDir( string $tmpDir ): void {
 		$this->tmpDir = $tmpDir;
@@ -171,6 +169,7 @@ class CsvEngine implements EngineInterface {
 	}
 
 	/**
+	 * @param resource $outputStream A writable stream resource.
 	 * @throws OutputException
 	 */
 	public function outputToStream( mixed $outputStream ): void {

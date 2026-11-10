@@ -14,6 +14,7 @@ A Streamed Data Export Tool
 Supported formats:
 - CSV / TSV
 - SpreadsheetML "Excel 2004 XML Spreadsheet"
+- XLSX "Office Open XML Spreadsheet"
 - More to come.
 
 The ZipStream dependency requires 64-bit PHP and the zlib extension.

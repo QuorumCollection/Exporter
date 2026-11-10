@@ -5,13 +5,14 @@ namespace Integration;
 use PHPUnit\Framework\TestCase;
 use Quorum\Exporter\DataExport;
 use Quorum\Exporter\DataSheet;
+use Quorum\Exporter\Engines\Csv\Encoding;
 use Quorum\Exporter\Engines\Csv\MultiSheetStrategy;
 use Quorum\Exporter\Engines\CsvEngine;
 
 class CsvIntegrationTest extends TestCase {
 
 	#[\PHPUnit\Framework\Attributes\DataProvider('encodingProvider')]
-	public function test_csv( string $encoding ): void {
+	public function test_csv( Encoding $encoding ): void {
 		$export = new DataExport(new CsvEngine($encoding));
 		$sheet  = new DataSheet;
 		$export->addSheet($sheet);
@@ -23,7 +24,7 @@ class CsvIntegrationTest extends TestCase {
 		$sheet->addRow([ 'test one', '日本語', 'test two' ]);
 		$export->export($temp);
 
-		$file = __DIR__ . '/fixtures/basic-csv-' . $encoding . '.csv';
+		$file = __DIR__ . '/fixtures/basic-csv-' . $encoding->value . '.csv';
 
 		$this->assertFileEquals($file, $tmpFile);
 
@@ -32,16 +33,16 @@ class CsvIntegrationTest extends TestCase {
 
 	public static function encodingProvider(): array {
 		return [
-			[ CsvEngine::UTF8 ],
-			[ CsvEngine::UTF16BE ],
-			[ CsvEngine::UTF16LE ],
-			[ CsvEngine::UTF32BE ],
-			[ CsvEngine::UTF32LE ],
+			[ Encoding::UTF8 ],
+			[ Encoding::UTF16BE ],
+			[ Encoding::UTF16LE ],
+			[ Encoding::UTF32BE ],
+			[ Encoding::UTF32LE ],
 		];
 	}
 
 	public function test_zipExportContainsNamedSheets(): void {
-		$engine = new CsvEngine(CsvEngine::UTF8, multiSheetStrategy: MultiSheetStrategy::ZIP);
+		$engine = new CsvEngine(Encoding::UTF8, multiSheetStrategy: MultiSheetStrategy::ZIP);
 		$export = new DataExport($engine);
 		$first = new DataSheet('first');
 		$first->addRow([ 'one', '日本語' ]);
@@ -65,7 +66,7 @@ class CsvIntegrationTest extends TestCase {
 	}
 
 	public function test_multiSheetStrategy(): void {
-		$engine = new CsvEngine(CsvEngine::UTF8);
+		$engine = new CsvEngine(Encoding::UTF8);
 		$this->assertSame(MultiSheetStrategy::CONCAT, $engine->getMultiSheetStrategy());
 		$engine->setMultiSheetStrategy(MultiSheetStrategy::ZIP);
 		$this->assertSame(MultiSheetStrategy::ZIP, $engine->getMultiSheetStrategy());
@@ -74,7 +75,7 @@ class CsvIntegrationTest extends TestCase {
 	}
 
 	#[\PHPUnit\Framework\Attributes\DataProvider('bomProvider')]
-	public function test_bomDefaultsAndOverrides( string $encoding, ?bool $bomEnabled, string $bom ): void {
+	public function test_bomDefaultsAndOverrides( Encoding $encoding, ?bool $bomEnabled, string $bom ): void {
 		$engine = new CsvEngine(outputEncoding: $encoding, bomEnabled: $bomEnabled);
 		$export = new DataExport($engine);
 		$sheet = new DataSheet;
@@ -84,24 +85,23 @@ class CsvIntegrationTest extends TestCase {
 		$this->assertIsResource($stream);
 		$export->export($stream);
 		rewind($stream);
-		$this->assertSame($bom . mb_convert_encoding("hello\n", $encoding, 'UTF-8'), stream_get_contents($stream));
+		$this->assertSame($bom . mb_convert_encoding("hello\n", $encoding->value, 'UTF-8'), stream_get_contents($stream));
 		fclose($stream);
 	}
 
 	public static function bomProvider(): array {
 		return [
-			[ CsvEngine::UTF8, null, '' ],
-			[ CsvEngine::UTF8, false, '' ],
-			[ CsvEngine::UTF8, true, "\xEF\xBB\xBF" ],
-			[ CsvEngine::UTF16LE, null, "\xFF\xFE" ],
-			[ CsvEngine::UTF16LE, false, '' ],
-			[ CsvEngine::UTF16LE, true, "\xFF\xFE" ],
-			[ 'ISO-8859-1', true, '' ],
+			[ Encoding::UTF8, null, '' ],
+			[ Encoding::UTF8, false, '' ],
+			[ Encoding::UTF8, true, "\xEF\xBB\xBF" ],
+			[ Encoding::UTF16LE, null, "\xFF\xFE" ],
+			[ Encoding::UTF16LE, false, '' ],
+			[ Encoding::UTF16LE, true, "\xFF\xFE" ],
 		];
 	}
 
 	#[\PHPUnit\Framework\Attributes\DataProvider('genericEncodingProvider')]
-	public function test_nativeByteOrder( string $encoding, string $littleEndianBom, string $bigEndianBom ): void {
+	public function test_nativeByteOrder( Encoding $encoding, string $littleEndianBom, string $bigEndianBom ): void {
 		$engine = new CsvEngine($encoding);
 		$export = new DataExport($engine);
 		$sheet = new DataSheet;
@@ -116,14 +116,14 @@ class CsvIntegrationTest extends TestCase {
 		$this->assertIsString($output);
 		$bom = unpack('S', "\x01\x00") === [ 1 => 1 ] ? $littleEndianBom : $bigEndianBom;
 		$this->assertStringStartsWith($bom, $output);
-		$this->assertSame("hello\nworld\n", mb_convert_encoding($output, 'UTF-8', $encoding));
+		$this->assertSame("hello\nworld\n", mb_convert_encoding($output, 'UTF-8', $encoding->value));
 		fclose($stream);
 	}
 
 	public static function genericEncodingProvider(): array {
 		return [
-			[ CsvEngine::UTF16, "\xFF\xFE", "\xFE\xFF" ],
-			[ CsvEngine::UTF32, "\xFF\xFE\0\0", "\0\0\xFE\xFF" ],
+			[ Encoding::UTF16, "\xFF\xFE", "\xFE\xFF" ],
+			[ Encoding::UTF32, "\xFF\xFE\0\0", "\0\0\xFE\xFF" ],
 		];
 	}
 

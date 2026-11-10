@@ -251,6 +251,25 @@ enum ByteOrderMark: string {
 }
 ```
 
+### Enum: Quorum\Exporter\Engines\Csv\Encoding
+
+Character encodings supported by the CSV engine.
+
+```php
+<?php
+namespace Quorum\Exporter\Engines\Csv;
+
+enum Encoding: string {
+	case UTF8 = 'UTF-8';
+	case UTF16 = 'UTF-16';
+	case UTF16BE = 'UTF-16BE';
+	case UTF16LE = 'UTF-16LE';
+	case UTF32 = 'UTF-32';
+	case UTF32BE = 'UTF-32BE';
+	case UTF32LE = 'UTF-32LE';
+}
+```
+
 ### Enum: Quorum\Exporter\Engines\Csv\MultiSheetStrategy
 
 Strategies for exporting multiple CSV sheets.
@@ -269,29 +288,14 @@ enum MultiSheetStrategy {
 
 ### Class: Quorum\Exporter\Engines\CsvEngine
 
-```php
-<?php
-namespace Quorum\Exporter\Engines;
-
-class CsvEngine {
-	public const UTF8 = 'UTF-8';
-	public const UTF16 = 'UTF-16';
-	public const UTF16BE = 'UTF-16BE';
-	public const UTF16LE = 'UTF-16LE';
-	public const UTF32 = 'UTF-32';
-	public const UTF32BE = 'UTF-32BE';
-	public const UTF32LE = 'UTF-32LE';
-}
-```
-
 #### Method: CsvEngine->__construct
 
 ```php
 function __construct(
-	string $outputEncoding = self::UTF16LE,
+	\Quorum\Exporter\Engines\Csv\Encoding $outputEncoding = \Quorum\Exporter\Engines\Csv\Encoding::UTF16LE,
 	?string $delimiter = null,
 	string $enclosure = '"',
-	string $inputEncoding = self::UTF8,
+	\Quorum\Exporter\Engines\Csv\Encoding|string $inputEncoding = \Quorum\Exporter\Engines\Csv\Encoding::UTF8,
 	?bool $bomEnabled = null,
 	\Quorum\Exporter\Engines\Csv\MultiSheetStrategy $multiSheetStrategy = \Quorum\Exporter\Engines\Csv\MultiSheetStrategy::CONCAT,
 )
@@ -307,10 +311,10 @@ While this may seem like an odd choice, the reason for this is cross platform Mi
 
 ##### Parameters
 
-- ***string*** `$outputEncoding` - The encoding to output. Defaults to UTF-16LE as it is by far the best supported by Excel
+- ***\Quorum\Exporter\Engines\Csv\Encoding*** `$outputEncoding` - The encoding to output. Defaults to UTF-16LE as it is by far the best supported by Excel
 - ***string*** | ***null*** `$delimiter` - Character to use as Delimiter. Default varies based on encoding.
 - ***string*** `$enclosure` - Character to use as Enclosure.
-- ***string*** `$inputEncoding` - The encoding of the input going into the CSVs.
+- ***\Quorum\Exporter\Engines\Csv\Encoding*** | ***string*** `$inputEncoding` - The encoding of the input going into the CSVs.
 - ***bool*** | ***null*** `$bomEnabled` - Whether to include a byte order mark. Null disables it for UTF-8 and enables it for other encodings.
 - ***\Quorum\Exporter\Engines\Csv\MultiSheetStrategy*** `$multiSheetStrategy` - How to export multiple sheets. Defaults to concatenation.
 

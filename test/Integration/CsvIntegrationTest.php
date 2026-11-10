@@ -9,9 +9,7 @@ use Quorum\Exporter\Engines\CsvEngine;
 
 class CsvIntegrationTest extends TestCase {
 
-	/**
-	 * @dataProvider encodingProvider
-	 */
+	#[\PHPUnit\Framework\Attributes\DataProvider('encodingProvider')]
 	public function test_csv( string $encoding ): void {
 		$export = new DataExport(new CsvEngine($encoding));
 		$sheet  = new DataSheet;
@@ -31,7 +29,7 @@ class CsvIntegrationTest extends TestCase {
 		fclose($temp);
 	}
 
-	public function encodingProvider(): array {
+	public static function encodingProvider(): array {
 		return [
 			[ CsvEngine::UTF8 ],
 			[ CsvEngine::UTF16BE ],
@@ -39,6 +37,31 @@ class CsvIntegrationTest extends TestCase {
 			[ CsvEngine::UTF32BE ],
 			[ CsvEngine::UTF32LE ],
 		];
+	}
+
+	public function test_zipExportContainsNamedSheets(): void {
+		$engine = new CsvEngine(CsvEngine::UTF8);
+		$engine->setMultiSheetStrategy(CsvEngine::STRATEGY_ZIP);
+		$export = new DataExport($engine);
+		$first = new DataSheet('first');
+		$first->addRow([ 'one', '日本語' ]);
+		$second = new DataSheet('second');
+		$second->addRow([ 'two', 42 ]);
+		$export->addSheet($first);
+		$export->addSheet($second);
+
+		$stream = tmpfile();
+		$this->assertIsResource($stream);
+		$path = stream_get_meta_data($stream)['uri'];
+		$export->export($stream);
+
+		$archive = new \ZipArchive;
+		$this->assertTrue($archive->open($path));
+		$this->assertSame(2, $archive->numFiles);
+		$this->assertSame("one,日本語\n", $archive->getFromName('first.csv'));
+		$this->assertSame("two,42\n", $archive->getFromName('second.csv'));
+		$archive->close();
+		fclose($stream);
 	}
 
 }

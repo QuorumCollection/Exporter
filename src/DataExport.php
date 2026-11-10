@@ -9,24 +9,20 @@ class DataExport {
 	/** @var DataSheet[] */
 	protected array $dataSheets = [];
 
-	protected EngineInterface $engine;
-
 	/**
 	 * DataExport is the object used to orchestrate the export process regardless of export format.
 	 *
 	 * @param \Quorum\Exporter\EngineInterface $engine The engine by which to export the data sheets.
 	 */
-	public function __construct( EngineInterface $engine ) {
-		$this->engine = $engine;
+	public function __construct( protected EngineInterface $engine ) {
 	}
 
 	/**
 	 * Add a Data Sheet to the export.
 	 *
 	 * @param DataSheet   $sheet      The DataSheet to add to the export
-	 * @param string|null $sheetTitle Optional Title to give the data export.
-	 *                                Most Engines will interpret this as filename (sans file extension).
-	 *                                If excluded, the name will be left to the engine.
+	 * @param string|null $sheetTitle Optional collection key. A later sheet with the same key replaces the earlier one.
+	 *                                Exported sheet names come from the DataSheet name.
 	 */
 	public function addSheet( DataSheet $sheet, ?string $sheetTitle = null ): void {
 		if( is_string($sheetTitle) ) {
@@ -39,10 +35,9 @@ class DataExport {
 	/**
 	 * Trigger the final export process.
 	 *
-	 * @param resource|null $outputStream The stream resource to export to.
-	 *                                    NULL will open a php://output resource.
+	 * @param resource|null $outputStream A writable stream resource. Null opens php://output.
 	 */
-	public function export( $outputStream = null ): void {
+	public function export( mixed $outputStream = null ): void {
 		if( $outputStream === null ) {
 			$outputStream = fopen('php://output', 'w');
 		}

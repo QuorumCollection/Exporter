@@ -13,16 +13,18 @@ Supported formats:
 - SpreadsheetML "Excel 2004 XML Spreadsheet"
 - More to come.
 
+The ZipStream dependency requires 64-bit PHP and the zlib extension.
+
 
 
 ## Requirements
 
-- **maennchen/zipstream-php**: ~2.1
+- **php**: >=8.1
 - **ext-SPL**: *
-- **ext-mbstring**: *
 - **ext-dom**: *
 - **ext-json**: *
-- **php**: >=7.4
+- **ext-mbstring**: *
+- **maennchen/zipstream-php**: ^3.0
 
 ## Installing
 
@@ -103,9 +105,8 @@ Add a Data Sheet to the export.
 ##### Parameters
 
 - ***\Quorum\Exporter\DataSheet*** `$sheet` - The DataSheet to add to the export
-- ***string*** | ***null*** `$sheetTitle` - Optional Title to give the data export.
-Most Engines will interpret this as filename (sans file extension).
-If excluded, the name will be left to the engine.
+- ***string*** | ***null*** `$sheetTitle` - Optional collection key. A later sheet with the same key replaces the earlier one.
+Exported sheet names come from the DataSheet name.
 
 ---
 
@@ -119,8 +120,7 @@ Trigger the final export process.
 
 ##### Parameters
 
-- ***resource*** | ***null*** `$outputStream` - The stream resource to export to.
-NULL will open a php://output resource.
+- ***resource*** | ***null*** `$outputStream` - A writable stream resource. Null opens php://output.
 
 ### Class: Quorum\Exporter\DataSheet
 
@@ -161,7 +161,7 @@ Append a row worth of data to the end of the Worksheet.
 
 ##### Parameters
 
-- ***mixed[]*** `$row` - An array of scalars.
+- ***array<int|string,scalar|null>*** `$row` - An array of scalar values or null. Values are converted to strings.
 
 **Throws**: `\Quorum\Exporter\Exceptions\InvalidDataTypeException`
 
@@ -170,14 +170,14 @@ Append a row worth of data to the end of the Worksheet.
 #### Method: DataSheet->addRows
 
 ```php
-function addRows($dataSet): void
+function addRows(iterable $dataSet): void
 ```
 
-Append multiple rows of data to the end of the Worksheet.
+Append rows from an iterable.
 
 ##### Parameters
 
-- ***iterable<mixed[]>*** `$dataSet` - An iterable of arrays of scalars.
+- ***iterable<array<int|string,scalar|null>>*** `$dataSet` - An iterable of rows.
 
 ---
 
@@ -188,6 +188,10 @@ function current(): ?array
 ```
 
 Return the current value
+
+##### Return Value
+
+- ***array<int|string,string>*** | ***null***
 
 ---
 
@@ -294,9 +298,7 @@ Character to use as CSV value enclosure. Commonly this will be `"`
 function setTmpDir(string $tmpDir): void
 ```
 
-Set the tmpDir to write interim files to.  
-  
-Defaults to `sys_get_temp_dir`
+Set the directory to check before creating a ZIP export. Defaults to `sys_get_temp_dir`.
 
 ---
 
@@ -383,7 +385,7 @@ function setCreatedTime(?int $createdTime): void
 
 ##### Parameters
 
-- ***int*** | ***null*** `$createdTime` - The timestamp to use for the created time. If null, the current time will be used.
+- ***int*** | ***null*** `$createdTime` - The timestamp to use for the created time. If null or zero, the current time is used.
 
 ### Class: Quorum\Exporter\Exceptions\ExportException
 

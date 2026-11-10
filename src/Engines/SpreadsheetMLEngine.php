@@ -40,7 +40,7 @@ class SpreadsheetMLEngine implements EngineInterface {
 					$cellData->setAttribute('ss:Type', is_numeric($value) ? 'Number' : 'String');
 					$cellData->appendChild($doc->createTextNode($value));
 					$rowCell->appendChild($cellData);
-					if( stripos($value, "\n") !== false ) {
+					if( str_contains($value, "\n") ) {
 						$rowCell->setAttribute('ss:StyleID', 's22');
 					}
 
@@ -72,7 +72,10 @@ class SpreadsheetMLEngine implements EngineInterface {
 		];
 	}
 
-	public function outputToStream( $outputStream ): void {
+	/**
+	 * @param resource $outputStream A writable stream resource.
+	 */
+	public function outputToStream( mixed $outputStream ): void {
 		$baseXml = $this->generateBaseXmlDocument();
 
 		$splitDocument = preg_split('%(?:</?Replace_This_Element_With_Worksheet\d+/?>){1,2}%', $baseXml);
@@ -182,7 +185,7 @@ class SpreadsheetMLEngine implements EngineInterface {
 	}
 
 	/**
-	 * @param int|null $createdTime The timestamp to use for the created time. If null, the current time will be used.
+	 * @param int|null $createdTime The timestamp to use for the created time. If null or zero, the current time is used.
 	 */
 	public function setCreatedTime( ?int $createdTime ): void {
 		$this->createdTime = $createdTime;

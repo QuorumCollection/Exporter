@@ -5,14 +5,18 @@ namespace Quorum\Exporter;
 interface EngineInterface {
 
 	/**
-	 * @access private
+	 * Process a sheet for export.
+	 *
+	 * @internal
 	 */
 	public function processSheet( DataSheet $sheet ): void;
 
 	/**
-	 * @param resource $outputStream
-	 * @access private
+	 * Write the processed sheets to a stream.
+	 *
+	 * @param resource $outputStream A writable stream resource.
+	 * @internal
 	 */
-	public function outputToStream( $outputStream ): void;
+	public function outputToStream( mixed $outputStream ): void;
 
 }

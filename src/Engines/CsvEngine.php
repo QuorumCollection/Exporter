@@ -7,7 +7,6 @@ use Quorum\Exporter\EngineInterface;
 use Quorum\Exporter\Exceptions\ExportException;
 use Quorum\Exporter\Exceptions\OutputException;
 use ZipStream\Exception\OverflowException;
-use ZipStream\Option\Archive;
 use ZipStream\ZipStream;
 
 class CsvEngine implements EngineInterface {
@@ -25,7 +24,7 @@ class CsvEngine implements EngineInterface {
 	public const UTF32BE = 'UTF-32BE';
 	public const UTF32LE = 'UTF-32LE';
 
-	/** @var array<string, resource> */
+	/** @var array<int|string, resource> */
 	protected array $streams = [];
 
 	protected string $outputEncoding;
@@ -61,7 +60,7 @@ class CsvEngine implements EngineInterface {
 		string $outputEncoding = self::UTF16LE,
 		?string $delimiter = null,
 		string $enclosure = '"',
-		string $inputEncoding = self::UTF8
+		string $inputEncoding = self::UTF8,
 	) {
 		$this->setDelimiter($delimiter);
 		$this->setEnclosure($enclosure);
@@ -97,9 +96,7 @@ class CsvEngine implements EngineInterface {
 	}
 
 	/**
-	 * Set the tmpDir to write interim files to.
-	 *
-	 * Defaults to `sys_get_temp_dir`
+	 * Set the directory to check before creating a ZIP export. Defaults to `sys_get_temp_dir`.
 	 */
 	public function setTmpDir( string $tmpDir ): void {
 		$this->tmpDir = $tmpDir;
@@ -171,9 +168,10 @@ class CsvEngine implements EngineInterface {
 	}
 
 	/**
+	 * @param resource $outputStream A writable stream resource.
 	 * @throws OutputException
 	 */
-	public function outputToStream( $outputStream ): void {
+	public function outputToStream( mixed $outputStream ): void {
 
 		switch( $this->multiSheetStrategy ) {
 			case self::STRATEGY_ZIP:
@@ -182,9 +180,7 @@ class CsvEngine implements EngineInterface {
 					throw new \RuntimeException("Temporary Directory Not Found");
 				}
 
-				$opt = new Archive;
-				$opt->setOutputStream($outputStream);
-				$zip = new ZipStream('foo.zip', $opt);
+				$zip = new ZipStream(outputStream: $outputStream, sendHttpHeaders: false);
 
 				foreach( $this->streams as $name => $stream ) {
 					rewind($stream);

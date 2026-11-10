@@ -44,6 +44,21 @@ class DataSheetTest extends TestCase {
 		$sheet->addRow([ new \stdClass ]);
 	}
 
+	public function test_rowsPreserveBinaryStrings(): void {
+		$sheet = new DataSheet;
+		$rows = [
+			[ "key\xFF\n" => "caf\xE9\0\n,\"", 2 => false ],
+			[ "\x00\xFF\r\n", 123 ],
+		];
+		$sheet->addRows($rows);
+		$expected = [
+			[ "key\xFF\n" => "caf\xE9\0\n,\"", 2 => '' ],
+			[ "\x00\xFF\r\n", '123' ],
+		];
+		$this->assertSame($expected, iterator_to_array($sheet, false));
+		$this->assertSame($expected, iterator_to_array($sheet, false));
+	}
+
 	public function test_addRowsAcceptsGenerators(): void {
 		$sheet = new DataSheet(name: 'Report');
 		$rows = (static function (): \Generator {

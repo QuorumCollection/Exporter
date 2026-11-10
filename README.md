@@ -314,7 +314,7 @@ While this may seem like an odd choice, the reason for this is cross platform Mi
 - ***\Quorum\Exporter\Engines\Csv\Encoding*** `$outputEncoding` - The encoding to output. Defaults to UTF-16LE as it is by far the best supported by Excel
 - ***string*** | ***null*** `$delimiter` - Character to use as Delimiter. Default varies based on encoding.
 - ***string*** `$enclosure` - Character to use as Enclosure.
-- ***\Quorum\Exporter\Engines\Csv\Encoding*** | ***string*** `$inputEncoding` - The encoding of the input going into the CSVs.
+- ***\Quorum\Exporter\Engines\Csv\Encoding*** | ***string*** `$inputEncoding` - The input encoding, as an enum case or an mbstring encoding name.
 - ***bool*** | ***null*** `$bomEnabled` - Whether to include a byte order mark. Null disables it for UTF-8 and enables it for other encodings.
 - ***\Quorum\Exporter\Engines\Csv\MultiSheetStrategy*** `$multiSheetStrategy` - How to export multiple sheets. Defaults to concatenation.
 

@@ -44,11 +44,6 @@ class DataSheet implements \Iterator {
 			$col = $this->normalizeValue($col);
 		}
 
-		$jsonRow = json_encode($row);
-		if( $jsonRow === false ) {
-			throw new InvalidDataTypeException('Unable to encode row');
-		}
-
 		if( $this->tmpStream === null ) {
 			$tmpStream = fopen("php://temp", "r+");
 			if( $tmpStream === false ) {
@@ -58,7 +53,7 @@ class DataSheet implements \Iterator {
 			$this->tmpStream = $tmpStream;
 		}
 
-		fwrite($this->tmpStream, $jsonRow . "\n");
+		fwrite($this->tmpStream, base64_encode(serialize($row)) . "\n");
 	}
 
 	private function normalizeValue( mixed $value ): string {
@@ -113,7 +108,12 @@ class DataSheet implements \Iterator {
 	 * @return array<int|string, string>
 	 */
 	private function decodeRow( string $row ): array {
-		$decodedRow = json_decode($row, true);
+		$serializedRow = base64_decode($row, true);
+		if( $serializedRow === false ) {
+			throw new \UnexpectedValueException('Unable to decode row');
+		}
+
+		$decodedRow = @unserialize($serializedRow, [ 'allowed_classes' => false ]);
 		if( !is_array($decodedRow) ) {
 			throw new \UnexpectedValueException('Unable to decode row');
 		}

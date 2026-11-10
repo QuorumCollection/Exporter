@@ -44,7 +44,7 @@ class CsvEngine implements EngineInterface {
 	 * @param Encoding           $outputEncoding     The encoding to output. Defaults to UTF-16LE as it is by far the best supported by Excel
 	 * @param string|null        $delimiter          Character to use as Delimiter. Default varies based on encoding.
 	 * @param string             $enclosure          Character to use as Enclosure.
-	 * @param Encoding|string    $inputEncoding      The encoding of the input going into the CSVs.
+	 * @param Encoding|string    $inputEncoding      The input encoding, as an enum case or an mbstring encoding name.
 	 * @param bool|null          $bomEnabled         Whether to include a byte order mark. Null disables it for UTF-8 and enables it for other encodings.
 	 * @param MultiSheetStrategy $multiSheetStrategy How to export multiple sheets. Defaults to concatenation.
 	 */
@@ -125,6 +125,15 @@ class CsvEngine implements EngineInterface {
 		};
 
 		foreach( $sheet as $data ) {
+			foreach( $data as &$value ) {
+				$value = mb_convert_encoding($value, 'UTF-8', $this->inputEncoding);
+				if( $value === false ) {
+					throw new ExportException('Unable to convert CSV data');
+				}
+			}
+
+			unset($value);
+
 			$mem = fopen('php://memory', 'w+');
 			if( $mem === false ) {
 				throw new OutputException('Unable to open temporary memory stream');
@@ -143,10 +152,7 @@ class CsvEngine implements EngineInterface {
 				throw new ExportException('Unable to read CSV data');
 			}
 
-			$line = mb_convert_encoding($line, $outputEncoding->value, $this->inputEncoding);
-			if( $line === false ) {
-				throw new ExportException('Unable to convert CSV data');
-			}
+			$line = mb_convert_encoding($line, $outputEncoding->value, 'UTF-8');
 
 			fputs($outputStream, $line);
 		}

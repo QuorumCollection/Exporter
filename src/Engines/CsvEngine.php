@@ -7,7 +7,6 @@ use Quorum\Exporter\EngineInterface;
 use Quorum\Exporter\Exceptions\ExportException;
 use Quorum\Exporter\Exceptions\OutputException;
 use ZipStream\Exception\OverflowException;
-use ZipStream\Option\Archive;
 use ZipStream\ZipStream;
 
 class CsvEngine implements EngineInterface {
@@ -181,9 +180,7 @@ class CsvEngine implements EngineInterface {
 					throw new \RuntimeException("Temporary Directory Not Found");
 				}
 
-				$opt = new Archive;
-				$opt->setOutputStream($outputStream);
-				$zip = new ZipStream('foo.zip', $opt);
+				$zip = new ZipStream(outputStream: $outputStream, sendHttpHeaders: false);
 
 				foreach( $this->streams as $name => $stream ) {
 					rewind($stream);

@@ -39,4 +39,29 @@ class CsvIntegrationTest extends TestCase {
 		];
 	}
 
+	public function test_zipExportContainsNamedSheets(): void {
+		$engine = new CsvEngine(CsvEngine::UTF8);
+		$engine->setMultiSheetStrategy(CsvEngine::STRATEGY_ZIP);
+		$export = new DataExport($engine);
+		$first = new DataSheet('first');
+		$first->addRow([ 'one', '日本語' ]);
+		$second = new DataSheet('second');
+		$second->addRow([ 'two', 42 ]);
+		$export->addSheet($first);
+		$export->addSheet($second);
+
+		$stream = tmpfile();
+		$this->assertIsResource($stream);
+		$path = stream_get_meta_data($stream)['uri'];
+		$export->export($stream);
+
+		$archive = new \ZipArchive;
+		$this->assertTrue($archive->open($path));
+		$this->assertSame(2, $archive->numFiles);
+		$this->assertSame("one,日本語\n", $archive->getFromName('first.csv'));
+		$this->assertSame("two,42\n", $archive->getFromName('second.csv'));
+		$archive->close();
+		fclose($stream);
+	}
+
 }

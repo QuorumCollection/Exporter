@@ -9,7 +9,7 @@ use Quorum\Exporter\Exceptions\InvalidDataTypeException;
  */
 class DataSheet implements \Iterator {
 
-	/** @var resource */
+	/** @var resource|null */
 	protected $tmpStream;
 
 	/** The row counter. */
@@ -24,12 +24,6 @@ class DataSheet implements \Iterator {
 	 *                          filename or Sheet name
 	 */
 	public function __construct( protected ?string $name = null ) {
-		$tmpStream = fopen("php://temp", "r+");
-		if( $tmpStream === false ) {
-			throw new \RuntimeException('Unable to open temporary stream');
-		}
-
-		$this->tmpStream = $tmpStream;
 	}
 
 	/**
@@ -53,6 +47,15 @@ class DataSheet implements \Iterator {
 		$jsonRow = json_encode($row);
 		if( $jsonRow === false ) {
 			throw new InvalidDataTypeException('Unable to encode row');
+		}
+
+		if( $this->tmpStream === null ) {
+			$tmpStream = fopen("php://temp", "r+");
+			if( $tmpStream === false ) {
+				throw new \RuntimeException('Unable to open temporary stream');
+			}
+
+			$this->tmpStream = $tmpStream;
 		}
 
 		fwrite($this->tmpStream, $jsonRow . "\n");
@@ -90,6 +93,12 @@ class DataSheet implements \Iterator {
 	 * Move forward to next element
 	 */
 	public function next(): void {
+		if( $this->tmpStream === null ) {
+			$this->currentValue = null;
+
+			return;
+		}
+
 		$string = fgets($this->tmpStream);
 
 		if( $string === false ) {
@@ -142,7 +151,10 @@ class DataSheet implements \Iterator {
 	 */
 	public function rewind(): void {
 		$this->rowIndex = 0;
-		rewind($this->tmpStream);
+		if( $this->tmpStream !== null ) {
+			rewind($this->tmpStream);
+		}
+
 		$this->next();
 	}
 

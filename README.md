@@ -231,28 +231,6 @@ Rewind the Iterator to the first element
 
 ### Class: Quorum\Exporter\EngineInterface
 
-#### Method: EngineInterface->processSheet
-
-```php
-function processSheet(\Quorum\Exporter\DataSheet $sheet): void
-```
-
-Process a sheet for export.
-
----
-
-#### Method: EngineInterface->outputToStream
-
-```php
-function outputToStream($outputStream): void
-```
-
-Write the processed sheets to a stream.
-
-##### Parameters
-
-- ***resource*** `$outputStream` - A writable stream resource.
-
 ### Class: Quorum\Exporter\Engines\CsvEngine
 
 ```php
@@ -349,32 +327,6 @@ Supported strategies are `CsvEngine::STRATEGY_ZIP` and `CsvEngine::STRATEGY_CONC
 
 ---
 
-#### Method: CsvEngine->processSheet
-
-```php
-function processSheet(\Quorum\Exporter\DataSheet $sheet): void
-```
-
-Process a sheet for export.
-
----
-
-#### Method: CsvEngine->outputToStream
-
-```php
-function outputToStream($outputStream): void
-```
-
-Write the processed sheets to a stream.
-
-##### Parameters
-
-- ***resource*** `$outputStream` - A writable stream resource.
-
-**Throws**: `\Quorum\Exporter\Exceptions\OutputException`
-
----
-
 #### Method: CsvEngine->getDelimiter
 
 ```php
@@ -418,28 +370,6 @@ function disableBom(bool $disable = true): void
 Whether to disable the leading Byte Order Mark for the given encoding from being output.
 
 ### Class: Quorum\Exporter\Engines\SpreadsheetMLEngine
-
-#### Method: SpreadsheetMLEngine->processSheet
-
-```php
-function processSheet(\Quorum\Exporter\DataSheet $sheet): void
-```
-
-Process a sheet for export.
-
----
-
-#### Method: SpreadsheetMLEngine->outputToStream
-
-```php
-function outputToStream($outputStream): void
-```
-
-Write the processed sheets to a stream.
-
-##### Parameters
-
-- ***resource*** `$outputStream` - A writable stream resource.
 
 ---
 

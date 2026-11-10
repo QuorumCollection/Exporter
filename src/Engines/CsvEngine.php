@@ -122,8 +122,8 @@ class CsvEngine implements EngineInterface {
 			default         => $this->outputEncoding,
 		};
 
-		foreach( $sheet as $data ) {
-			foreach( $sheet->getRawCurrentRow() ?? $data as $key => $value ) {
+		foreach( $sheet->rawRows() as $data ) {
+			foreach( $data as $key => $value ) {
 				$converted = is_string($value) ? mb_convert_encoding($value, 'UTF-8', $this->inputEncoding) : (string)$value;
 				if( $converted === false ) {
 					throw new ExportException('Unable to convert CSV data');

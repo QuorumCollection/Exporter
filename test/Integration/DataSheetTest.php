@@ -41,15 +41,43 @@ class DataSheetTest extends TestCase {
 	public function test_iterationRetainsStringValues(): void {
 		$sheet = new DataSheet;
 		$sheet->addRow([ 'text' => 'hello', 'count' => 42, 'active' => true, 'empty' => null ]);
-		$this->assertNull($sheet->getRawCurrentRow());
 		$sheet->rewind();
-		$this->assertSame([ 'text' => 'hello', 'count' => 42, 'active' => true, 'empty' => null ], $sheet->getRawCurrentRow());
 		$this->assertSame([ 'text' => 'hello', 'count' => '42', 'active' => '1', 'empty' => '' ], $sheet->current());
 		$sheet->next();
 		$this->assertNull($sheet->current());
-		$this->assertNull($sheet->getRawCurrentRow());
 		$sheet->rewind();
 		$this->assertSame([ 'text' => 'hello', 'count' => '42', 'active' => '1', 'empty' => '' ], $sheet->current());
+	}
+
+	public function test_rawRowsPreserveTypesAndIteratorPosition(): void {
+		$sheet = new DataSheet;
+		$this->assertSame([], iterator_to_array($sheet->rawRows()));
+		$sheet->addRows([
+			[ 'text' => "caf\xE9", 'count' => 42, 'active' => true, 'empty' => null ],
+			[],
+			[ false, 3.5 ],
+		]);
+
+		$rows = $sheet->rawRows();
+		$this->assertSame([ 'text' => "caf\xE9", 'count' => 42, 'active' => true, 'empty' => null ], $rows->current());
+		$this->assertSame(1, $sheet->key());
+		$this->assertSame([ 'text' => "caf\xE9", 'count' => '42', 'active' => '1', 'empty' => '' ], $sheet->current());
+		unset($rows);
+		$sheet->next();
+		$this->assertSame([], $sheet->current());
+		$this->assertSame(2, $sheet->key());
+
+		$this->assertSame([
+			[ 'text' => "caf\xE9", 'count' => 42, 'active' => true, 'empty' => null ],
+			[],
+			[ false, 3.5 ],
+		], iterator_to_array($sheet->rawRows(), false));
+		$this->assertNull($sheet->current());
+		$this->assertSame([
+			[ 'text' => "caf\xE9", 'count' => '42', 'active' => '1', 'empty' => '' ],
+			[],
+			[ '', '3.5' ],
+		], iterator_to_array($sheet, false));
 	}
 
 	public function test_addRowRejectsNonScalarValues(): void {

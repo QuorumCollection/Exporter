@@ -16,8 +16,6 @@ class DataSheet implements \Iterator {
 	protected int $rowIndex = 0;
 	/** @var array<int|string, string>|null The current iterator value */
 	protected ?array $currentValue = null;
-	/** @var array<int|string, scalar|null>|null */
-	private ?array $rawCurrentValue = null;
 
 	/**
 	 * DataSheet is the representation of a Worksheet
@@ -85,36 +83,52 @@ class DataSheet implements \Iterator {
 	}
 
 	/**
-	 * Return the current row before values are converted to strings.
+	 * Iterate over rows before values are converted to strings.
 	 *
-	 * @return array<int|string, scalar|null>|null
+	 * @return \Generator<int, array<int|string, scalar|null>>
 	 * @internal
 	 */
-	public function getRawCurrentRow(): ?array {
-		return $this->rawCurrentValue;
+	public function rawRows(): \Generator {
+		$this->rowIndex = 0;
+		if( $this->tmpStream !== null ) {
+			rewind($this->tmpStream);
+		}
+
+		while( ($row = $this->readRow()) !== null ) {
+			yield $this->rowIndex => $row;
+		}
 	}
 
 	/**
 	 * Move forward to next element
 	 */
 	public function next(): void {
+		$this->readRow();
+	}
+
+	/**
+	 * @return array<int|string, scalar|null>|null
+	 */
+	private function readRow(): ?array {
 		if( $this->tmpStream === null ) {
 			$this->currentValue = null;
-			$this->rawCurrentValue = null;
 
-			return;
+			return null;
 		}
 
 		$string = fgets($this->tmpStream);
 
 		if( $string === false ) {
 			$this->currentValue = null;
-			$this->rawCurrentValue = null;
-		} else {
-			$this->rawCurrentValue = $this->decodeRow($string);
-			$this->currentValue = array_map('strval', $this->rawCurrentValue);
-			$this->rowIndex++;
+
+			return null;
 		}
+
+		$row = $this->decodeRow($string);
+		$this->currentValue = array_map('strval', $row);
+		$this->rowIndex++;
+
+		return $row;
 	}
 
 	/**

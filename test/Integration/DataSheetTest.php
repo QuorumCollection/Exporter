@@ -8,6 +8,26 @@ use Quorum\Exporter\Exceptions\InvalidDataTypeException;
 
 class DataSheetTest extends TestCase {
 
+	public function test_streamOpensWhenFirstRowIsAdded(): void {
+		$sheet = new DataSheet('Report');
+		$streamProperty = new \ReflectionProperty(DataSheet::class, 'tmpStream');
+
+		$this->assertNull($streamProperty->getValue($sheet));
+		$this->assertSame('Report', $sheet->getName());
+		$this->assertSame([], iterator_to_array($sheet));
+		$sheet->next();
+		$this->assertNull($sheet->current());
+		$this->assertNull($streamProperty->getValue($sheet));
+
+		$sheet->addRow([ 'first' ]);
+		$stream = $streamProperty->getValue($sheet);
+		$this->assertIsResource($stream);
+		$sheet->addRow([ 'second' ]);
+		$this->assertSame($stream, $streamProperty->getValue($sheet));
+		$this->assertSame([ [ 'first' ], [ 'second' ] ], iterator_to_array($sheet, false));
+		$this->assertSame([ [ 'first' ], [ 'second' ] ], iterator_to_array($sheet, false));
+	}
+
 	public function test_currentIsNullBeforeAndAfterIteration(): void {
 		$sheet = new DataSheet;
 		$this->assertNull($sheet->current());

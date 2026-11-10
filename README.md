@@ -253,7 +253,7 @@ enum ByteOrderMark: string {
 
 ### Enum: Quorum\Exporter\Engines\Csv\Encoding
 
-Character encodings supported by the CSV engine.
+Character encodings supported by the CSV engine. Generic UTF-16 and UTF-32 output uses native byte order.
 
 ```php
 <?php

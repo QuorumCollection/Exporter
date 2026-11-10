@@ -39,8 +39,6 @@ class CsvEngine implements EngineInterface {
 	 *
 	 * - https://donatstudios.com/CSV-An-Encoding-Nightmare
 	 *
-	 * @see http://php.net/manual/en/function.mb-list-encodings.php for list of encoding strings.
-	 *
 	 * @param Encoding           $outputEncoding     The encoding to output. Defaults to UTF-16LE as it is by far the best supported by Excel
 	 * @param string|null        $delimiter          A single ASCII byte. The default varies based on encoding.
 	 * @param string             $enclosure          A single ASCII byte used to enclose fields.
@@ -121,7 +119,7 @@ class CsvEngine implements EngineInterface {
 		$outputEncoding = match( $this->outputEncoding ) {
 			Encoding::UTF16 => $this->isLittleEndian() ? Encoding::UTF16LE : Encoding::UTF16BE,
 			Encoding::UTF32 => $this->isLittleEndian() ? Encoding::UTF32LE : Encoding::UTF32BE,
-			default     => $this->outputEncoding,
+			default         => $this->outputEncoding,
 		};
 
 		foreach( $sheet as $data ) {
@@ -153,7 +151,6 @@ class CsvEngine implements EngineInterface {
 			}
 
 			$line = mb_convert_encoding($line, $outputEncoding->value, 'UTF-8');
-
 			fputs($outputStream, $line);
 		}
 
@@ -260,10 +257,9 @@ class CsvEngine implements EngineInterface {
 			Encoding::UTF32   => $this->isLittleEndian() ? ByteOrderMark::UTF32LE : ByteOrderMark::UTF32BE,
 			Encoding::UTF32BE => ByteOrderMark::UTF32BE,
 			Encoding::UTF32LE => ByteOrderMark::UTF32LE,
-			default       => null,
 		};
 
-		return $bom === null ? '' : $bom->value;
+		return $bom->value;
 	}
 
 	final protected function isLittleEndian(): bool {

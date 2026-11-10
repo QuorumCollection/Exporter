@@ -161,7 +161,7 @@ Append a row worth of data to the end of the Worksheet.
 
 ##### Parameters
 
-- ***mixed[]*** `$row` - An array of scalar values or null. Values are converted to strings.
+- ***array<int|string,scalar|null>*** `$row` - An array of scalar values or null. Values are converted to strings.
 
 **Throws**: `\Quorum\Exporter\Exceptions\InvalidDataTypeException`
 
@@ -177,7 +177,7 @@ Append rows from an iterable or an object with public row properties.
 
 ##### Parameters
 
-- ***iterable<mixed[]>*** `$dataSet` - An iterable of rows.
+- ***iterable<array<int|string,scalar|null>>*** `$dataSet` - An iterable of rows.
 
 ---
 
@@ -188,6 +188,10 @@ function current(): ?array
 ```
 
 Return the current value
+
+##### Return Value
+
+- ***array<int|string,string>*** | ***null***
 
 ---
 

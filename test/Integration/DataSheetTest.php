@@ -4,8 +4,25 @@ namespace Integration;
 
 use PHPUnit\Framework\TestCase;
 use Quorum\Exporter\DataSheet;
+use Quorum\Exporter\Exceptions\InvalidDataTypeException;
 
 class DataSheetTest extends TestCase {
+
+	public function test_currentIsNullBeforeAndAfterIteration(): void {
+		$sheet = new DataSheet;
+		$this->assertNull($sheet->current());
+		$sheet->addRow([ 'first' ]);
+		$sheet->rewind();
+		$this->assertSame([ 'first' ], $sheet->current());
+		$sheet->next();
+		$this->assertNull($sheet->current());
+	}
+
+	public function test_addRowRejectsNonScalarValues(): void {
+		$sheet = new DataSheet;
+		$this->expectException(InvalidDataTypeException::class);
+		$sheet->addRow([ new \stdClass ]);
+	}
 
 	public function test_addRowsAcceptsGenerators(): void {
 		$sheet = new DataSheet(name: 'Report');

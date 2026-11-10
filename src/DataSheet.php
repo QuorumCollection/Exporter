@@ -15,7 +15,7 @@ class DataSheet implements \Iterator {
 	/** The row counter. */
 	protected int $rowIndex = 0;
 	/** @var array<int|string, string>|null The current iterator value */
-	protected ?array $currentValue;
+	protected ?array $currentValue = null;
 
 	/**
 	 * DataSheet is the representation of a Worksheet
@@ -42,16 +42,12 @@ class DataSheet implements \Iterator {
 	/**
 	 * Append a row worth of data to the end of the Worksheet.
 	 *
-	 * @param array<mixed> $row An array of scalar values or null. Values are converted to strings.
+	 * @param array<int|string, scalar|null> $row An array of scalar values or null. Values are converted to strings.
 	 * @throws InvalidDataTypeException
 	 */
 	public function addRow( array $row ): void {
 		foreach( $row as &$col ) {
-			if( !is_scalar($col) && $col !== null ) {
-				throw new InvalidDataTypeException;
-			}
-
-			$col = (string)$col;
+			$col = $this->normalizeValue($col);
 		}
 
 		$jsonRow = json_encode($row);
@@ -62,10 +58,18 @@ class DataSheet implements \Iterator {
 		fwrite($this->tmpStream, $jsonRow . "\n");
 	}
 
+	private function normalizeValue( mixed $value ): string {
+		if( !is_scalar($value) && $value !== null ) {
+			throw new InvalidDataTypeException;
+		}
+
+		return (string)$value;
+	}
+
 	/**
 	 * Append rows from an iterable or an object with public row properties.
 	 *
-	 * @param iterable<array<mixed>> $dataSet An iterable of rows.
+	 * @param iterable<array<int|string, scalar|null>> $dataSet An iterable of rows.
 	 */
 	public function addRows( mixed $dataSet ): void {
 		foreach( $dataSet as $row ) {
@@ -75,6 +79,8 @@ class DataSheet implements \Iterator {
 
 	/**
 	 * Return the current value
+	 *
+	 * @return array<int|string, string>|null
 	 */
 	public function current(): ?array {
 		return $this->currentValue;

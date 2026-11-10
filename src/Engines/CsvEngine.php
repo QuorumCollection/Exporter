@@ -24,7 +24,7 @@ class CsvEngine implements EngineInterface {
 	public const UTF32BE = 'UTF-32BE';
 	public const UTF32LE = 'UTF-32LE';
 
-	/** @var array<string, resource> */
+	/** @var array<int|string, resource> */
 	protected array $streams = [];
 
 	protected string $outputEncoding;

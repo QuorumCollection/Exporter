@@ -42,8 +42,8 @@ class CsvEngine implements EngineInterface {
 	 * @see http://php.net/manual/en/function.mb-list-encodings.php for list of encoding strings.
 	 *
 	 * @param Encoding           $outputEncoding     The encoding to output. Defaults to UTF-16LE as it is by far the best supported by Excel
-	 * @param string|null        $delimiter          Character to use as Delimiter. Default varies based on encoding.
-	 * @param string             $enclosure          Character to use as Enclosure.
+	 * @param string|null        $delimiter          A single ASCII byte. The default varies based on encoding.
+	 * @param string             $enclosure          A single ASCII byte used to enclose fields.
 	 * @param Encoding|string    $inputEncoding      The input encoding, as an enum case or an mbstring encoding name.
 	 * @param bool|null          $bomEnabled         Whether to include a byte order mark. Null disables it for UTF-8 and enables it for other encodings.
 	 * @param MultiSheetStrategy $multiSheetStrategy How to export multiple sheets. Defaults to concatenation.
@@ -68,8 +68,8 @@ class CsvEngine implements EngineInterface {
 	 * Character to use as CSV value enclosure. Commonly this will be `"`
 	 */
 	public function setEnclosure( string $enclosure ): void {
-		if( strlen($enclosure) !== 1 ) {
-			throw new \InvalidArgumentException('Enclosure must be exactly one byte');
+		if( strlen($enclosure) !== 1 || ord($enclosure) > 0x7F ) {
+			throw new \InvalidArgumentException('Enclosure must be a single ASCII byte');
 		}
 
 		$this->enclosure = $enclosure;
@@ -230,11 +230,11 @@ class CsvEngine implements EngineInterface {
 	/**
 	 * Sets delimiter. Setting to NULL triggers automatic delimiter decision based on recommended encoding rules.
 	 *
-	 * @param string|null $delimiter Delimiter Character. Must be a single byte.
+	 * @param string|null $delimiter Delimiter character. Must be a single ASCII byte.
 	 */
 	public function setDelimiter( ?string $delimiter ): void {
-		if( $delimiter !== null && strlen($delimiter) !== 1 ) {
-			throw new \InvalidArgumentException('Delimiter must be exactly one byte');
+		if( $delimiter !== null && (strlen($delimiter) !== 1 || ord($delimiter) > 0x7F) ) {
+			throw new \InvalidArgumentException('Delimiter must be a single ASCII byte');
 		}
 
 		$this->delimiter = $delimiter;

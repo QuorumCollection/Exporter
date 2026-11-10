@@ -4,6 +4,7 @@ namespace Integration;
 
 use PHPUnit\Framework\TestCase;
 use Quorum\Exporter\DataSheet;
+use Quorum\Exporter\Engines\Csv\Encoding;
 use Quorum\Exporter\Exceptions\InvalidDataTypeException;
 
 class DataSheetTest extends TestCase {
@@ -49,56 +50,47 @@ class DataSheetTest extends TestCase {
 		$this->assertSame([ 'text' => 'hello', 'count' => '42', 'active' => '1', 'empty' => '' ], $sheet->current());
 	}
 
-	public function test_rawRowsPreserveTypesAndIteratorPosition(): void {
-		$sheet = new DataSheet;
-		$this->assertSame([], iterator_to_array($sheet->rawRows()));
-		$sheet->addRows([
-			[ 'text' => "caf\xE9", 'count' => 42, 'active' => true, 'empty' => null ],
-			[],
-			[ false, 3.5 ],
-		]);
-
-		$rows = $sheet->rawRows();
-		$this->assertSame([ 'text' => "caf\xE9", 'count' => 42, 'active' => true, 'empty' => null ], $rows->current());
-		$this->assertSame(1, $sheet->key());
-		$this->assertSame([ 'text' => "caf\xE9", 'count' => '42', 'active' => '1', 'empty' => '' ], $sheet->current());
-		unset($rows);
-		$sheet->next();
-		$this->assertSame([], $sheet->current());
-		$this->assertSame(2, $sheet->key());
-
-		$this->assertSame([
-			[ 'text' => "caf\xE9", 'count' => 42, 'active' => true, 'empty' => null ],
-			[],
-			[ false, 3.5 ],
-		], iterator_to_array($sheet->rawRows(), false));
-		$this->assertNull($sheet->current());
-		$this->assertSame([
-			[ 'text' => "caf\xE9", 'count' => '42', 'active' => '1', 'empty' => '' ],
-			[],
-			[ '', '3.5' ],
-		], iterator_to_array($sheet, false));
-	}
-
 	public function test_addRowRejectsNonScalarValues(): void {
 		$sheet = new DataSheet;
 		$this->expectException(InvalidDataTypeException::class);
 		$sheet->addRow([ new \stdClass ]);
 	}
 
-	public function test_rowsPreserveBinaryStrings(): void {
-		$sheet = new DataSheet;
-		$rows = [
-			[ "key\xFF\n" => "caf\xE9\0\n,\"", 2 => false ],
-			[ "\x00\xFF\r\n", 123 ],
-		];
-		$sheet->addRows($rows);
+	public function test_nonUtf8RowsAreStoredAsUtf8(): void {
+		$sheet = new DataSheet(inputEncoding: 'ISO-8859-1');
+		$sheet->addRows([
+			[ "café\n" => "caf\xE9\0\n,\"", 2 => false ],
+			[ "d\xE9j\xE0", 123 ],
+		]);
 		$expected = [
-			[ "key\xFF\n" => "caf\xE9\0\n,\"", 2 => '' ],
-			[ "\x00\xFF\r\n", '123' ],
+			[ "café\n" => "café\0\n,\"", 2 => '' ],
+			[ 'déjà', '123' ],
 		];
 		$this->assertSame($expected, iterator_to_array($sheet, false));
 		$this->assertSame($expected, iterator_to_array($sheet, false));
+	}
+
+	public function test_multibyteInputPreservesScalarValues(): void {
+		$sheet = new DataSheet(inputEncoding: Encoding::UTF16LE);
+		$sheet->addRow([ mb_convert_encoding('café', 'UTF-16LE', 'UTF-8'), 42, 3.5, true, false, null ]);
+		$this->assertSame([ [ 'café', '42', '3.5', '1', '', '' ] ], iterator_to_array($sheet, false));
+	}
+
+	public function test_invalidInputEncoding(): void {
+		$this->expectException(\InvalidArgumentException::class);
+		new DataSheet(inputEncoding: 'invalid-encoding');
+	}
+
+	public function test_invalidUtf8IsRejected(): void {
+		$sheet = new DataSheet;
+		$this->expectException(InvalidDataTypeException::class);
+		$sheet->addRow([ "caf\xE9" ]);
+	}
+
+	public function test_nonUtf8KeysAreRejected(): void {
+		$sheet = new DataSheet(inputEncoding: 'ISO-8859-1');
+		$this->expectException(InvalidDataTypeException::class);
+		$sheet->addRow([ "caf\xE9" => 'value' ]);
 	}
 
 	public function test_addRowsAcceptsGenerators(): void {

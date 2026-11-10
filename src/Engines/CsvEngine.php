@@ -18,8 +18,6 @@ class CsvEngine implements EngineInterface {
 	protected array $streams = [];
 
 	protected Encoding $outputEncoding;
-	protected string $inputEncoding;
-
 	protected ?string $delimiter;
 	protected string $enclosure;
 
@@ -42,7 +40,6 @@ class CsvEngine implements EngineInterface {
 	 * @param Encoding           $outputEncoding     The encoding to output. Defaults to UTF-16LE as it is by far the best supported by Excel
 	 * @param string|null        $delimiter          A single ASCII byte. The default varies based on encoding.
 	 * @param string             $enclosure          A single ASCII byte used to enclose fields.
-	 * @param Encoding|string    $inputEncoding      The input encoding, as an enum case or an mbstring encoding name.
 	 * @param bool|null          $bomEnabled         Whether to include a byte order mark. Null disables it for UTF-8 and enables it for other encodings.
 	 * @param MultiSheetStrategy $multiSheetStrategy How to export multiple sheets. Defaults to concatenation.
 	 */
@@ -50,14 +47,12 @@ class CsvEngine implements EngineInterface {
 		Encoding $outputEncoding = Encoding::UTF16LE,
 		?string $delimiter = null,
 		string $enclosure = '"',
-		Encoding|string $inputEncoding = Encoding::UTF8,
 		?bool $bomEnabled = null,
 		MultiSheetStrategy $multiSheetStrategy = MultiSheetStrategy::CONCAT,
 	) {
 		$this->setDelimiter($delimiter);
 		$this->setEnclosure($enclosure);
 		$this->setOutputEncoding($outputEncoding);
-		$this->setInputEncoding($inputEncoding);
 		$this->disableBom = !($bomEnabled ?? ($outputEncoding !== Encoding::UTF8));
 		$this->multiSheetStrategy = $multiSheetStrategy;
 	}
@@ -75,18 +70,6 @@ class CsvEngine implements EngineInterface {
 
 	protected function setOutputEncoding( Encoding $outputEncoding ): void {
 		$this->outputEncoding = $outputEncoding;
-	}
-
-	protected function setInputEncoding( Encoding|string $inputEncoding ): void {
-		if( $inputEncoding instanceof Encoding ) {
-			$inputEncoding = $inputEncoding->value;
-		}
-
-		if( !in_array($inputEncoding, mb_list_encodings(), true) ) {
-			throw new \InvalidArgumentException('Invalid Encoding');
-		}
-
-		$this->inputEncoding = $inputEncoding;
 	}
 
 	/**
@@ -122,16 +105,7 @@ class CsvEngine implements EngineInterface {
 			default         => $this->outputEncoding,
 		};
 
-		foreach( $sheet->rawRows() as $data ) {
-			foreach( $data as $key => $value ) {
-				$converted = is_string($value) ? mb_convert_encoding($value, 'UTF-8', $this->inputEncoding) : (string)$value;
-				if( $converted === false ) {
-					throw new ExportException('Unable to convert CSV data');
-				}
-
-				$data[$key] = $converted;
-			}
-
+		foreach( $sheet as $data ) {
 			$mem = fopen('php://memory', 'w+');
 			if( $mem === false ) {
 				throw new OutputException('Unable to open temporary memory stream');

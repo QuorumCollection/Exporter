@@ -43,7 +43,7 @@ class CsvIntegrationTest extends TestCase {
 
 	#[\PHPUnit\Framework\Attributes\DataProvider('genericEncodingProvider')]
 	public function test_genericEncoding( Encoding $encoding, string $littleEndianBom, string $bigEndianBom ): void {
-		$engine = new CsvEngine(outputEncoding: $encoding, inputEncoding: Encoding::UTF8);
+		$engine = new CsvEngine(outputEncoding: $encoding);
 		$this->assertSame("\t", $engine->getDelimiter());
 		$export = new DataExport($engine);
 		$sheet = new DataSheet;
@@ -138,9 +138,9 @@ class CsvIntegrationTest extends TestCase {
 	}
 
 	public function test_customInputEncoding(): void {
-		$engine = new CsvEngine(outputEncoding: Encoding::UTF8, inputEncoding: 'ISO-8859-1');
+		$engine = new CsvEngine(outputEncoding: Encoding::UTF8);
 		$export = new DataExport($engine);
-		$sheet = new DataSheet;
+		$sheet = new DataSheet(inputEncoding: 'ISO-8859-1');
 		$sheet->addRow([ "caf\xE9", "d\xE9j\xE0, vu" ]);
 		$export->addSheet($sheet);
 		$stream = fopen('php://temp', 'r+');
@@ -152,9 +152,9 @@ class CsvIntegrationTest extends TestCase {
 	}
 
 	public function test_multibyteInputEncoding(): void {
-		$engine = new CsvEngine(outputEncoding: Encoding::UTF8, inputEncoding: Encoding::UTF16LE);
+		$engine = new CsvEngine(outputEncoding: Encoding::UTF8);
 		$export = new DataExport($engine);
-		$sheet = new DataSheet;
+		$sheet = new DataSheet(inputEncoding: Encoding::UTF16LE);
 		$sheet->addRow([
 			mb_convert_encoding('café', 'UTF-16LE', 'UTF-8'),
 			mb_convert_encoding('one,two', 'UTF-16LE', 'UTF-8'),
@@ -174,19 +174,35 @@ class CsvIntegrationTest extends TestCase {
 		fclose($stream);
 	}
 
-	public function test_invalidInputEncoding(): void {
-		$this->expectException(\InvalidArgumentException::class);
-		new CsvEngine(inputEncoding: 'invalid-encoding');
+	public function test_usesSheetIterator(): void {
+		$sheet = new class extends DataSheet {
+
+			public function current(): ?array {
+				$row = parent::current();
+
+				return $row === null ? null : array_map('strtoupper', $row);
+			}
+
+		};
+		$sheet->addRow([ 'hello' ]);
+		$export = new DataExport(new CsvEngine(Encoding::UTF8));
+		$export->addSheet($sheet);
+		$stream = fopen('php://temp', 'r+');
+		$this->assertIsResource($stream);
+		$export->export($stream);
+		rewind($stream);
+		$this->assertSame("HELLO\n", stream_get_contents($stream));
+		fclose($stream);
 	}
 
 	public function test_rejectsNonAsciiDelimiter(): void {
 		$this->expectException(\InvalidArgumentException::class);
-		new CsvEngine(outputEncoding: Encoding::UTF8, delimiter: "\xA7", inputEncoding: 'ISO-8859-1');
+		new CsvEngine(outputEncoding: Encoding::UTF8, delimiter: "\xA7");
 	}
 
 	public function test_rejectsNonAsciiEnclosure(): void {
 		$this->expectException(\InvalidArgumentException::class);
-		new CsvEngine(outputEncoding: Encoding::UTF8, enclosure: "\xA7", inputEncoding: 'ISO-8859-1');
+		new CsvEngine(outputEncoding: Encoding::UTF8, enclosure: "\xA7");
 	}
 
 	public function test_zipExportContainsNamedSheets(): void {

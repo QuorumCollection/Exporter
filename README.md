@@ -127,15 +127,21 @@ Trigger the final export process.
 #### Method: DataSheet->__construct
 
 ```php
-function __construct(?string $name = null)
+function __construct(
+	?string $name = null,
+	\Quorum\Exporter\Engines\Csv\Encoding|string $inputEncoding = \Quorum\Exporter\Engines\Csv\Encoding::UTF8,
+)
 ```
 
-DataSheet is the representation of a Worksheet
+DataSheet represents a worksheet. String values are converted to UTF-8 when rows are added.
 
 ##### Parameters
 
 - ***string*** | ***null*** `$name` - The name to give the sheet. The use is Engine implementation specific but is likely
 filename or Sheet name
+- ***\Quorum\Exporter\Engines\Csv\Encoding*** | ***string*** `$inputEncoding` - The encoding of string values, as an enum case or an mbstring encoding name. Defaults to UTF-8.
+
+**Throws**: `\InvalidArgumentException` - If the input encoding is not supported.
 
 ---
 
@@ -155,11 +161,11 @@ Get the name of the sheet. Use thereof is Engine Specific
 function addRow(array $row): void
 ```
 
-Append a row worth of data to the end of the Worksheet.
+Append a row. String values use the configured input encoding. Array keys must be valid UTF-8. Values are converted to UTF-8 strings.
 
 ##### Parameters
 
-- ***array<int|string,scalar|null>*** `$row` - An array of scalar values or null. Values are converted to strings.
+- ***array<int|string,scalar|null>*** `$row` - An array of scalar values or null.
 
 **Throws**: `\Quorum\Exporter\Exceptions\InvalidDataTypeException`
 
@@ -295,7 +301,6 @@ function __construct(
 	\Quorum\Exporter\Engines\Csv\Encoding $outputEncoding = \Quorum\Exporter\Engines\Csv\Encoding::UTF16LE,
 	?string $delimiter = null,
 	string $enclosure = '"',
-	\Quorum\Exporter\Engines\Csv\Encoding|string $inputEncoding = \Quorum\Exporter\Engines\Csv\Encoding::UTF8,
 	?bool $bomEnabled = null,
 	\Quorum\Exporter\Engines\Csv\MultiSheetStrategy $multiSheetStrategy = \Quorum\Exporter\Engines\Csv\MultiSheetStrategy::CONCAT,
 )
@@ -314,7 +319,6 @@ While this may seem like an odd choice, the reason for this is cross platform Mi
 - ***\Quorum\Exporter\Engines\Csv\Encoding*** `$outputEncoding` - The encoding to output. Defaults to UTF-16LE as it is by far the best supported by Excel
 - ***string*** | ***null*** `$delimiter` - A single ASCII byte. The default varies based on encoding.
 - ***string*** `$enclosure` - A single ASCII byte used to enclose fields.
-- ***\Quorum\Exporter\Engines\Csv\Encoding*** | ***string*** `$inputEncoding` - The input encoding, as an enum case or an mbstring encoding name.
 - ***bool*** | ***null*** `$bomEnabled` - Whether to include a byte order mark. Null disables it for UTF-8 and enables it for other encodings.
 - ***\Quorum\Exporter\Engines\Csv\MultiSheetStrategy*** `$multiSheetStrategy` - How to export multiple sheets. Defaults to concatenation.
 

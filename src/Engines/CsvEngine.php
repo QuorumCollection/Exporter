@@ -125,14 +125,14 @@ class CsvEngine implements EngineInterface {
 		};
 
 		foreach( $sheet as $data ) {
-			foreach( $data as &$value ) {
-				$value = mb_convert_encoding($value, 'UTF-8', $this->inputEncoding);
-				if( $value === false ) {
+			foreach( $sheet->getRawCurrentRow() ?? $data as $key => $value ) {
+				$converted = is_string($value) ? mb_convert_encoding($value, 'UTF-8', $this->inputEncoding) : (string)$value;
+				if( $converted === false ) {
 					throw new ExportException('Unable to convert CSV data');
 				}
-			}
 
-			unset($value);
+				$data[$key] = $converted;
+			}
 
 			$mem = fopen('php://memory', 'w+');
 			if( $mem === false ) {

@@ -16,6 +16,8 @@ class DataSheet implements \Iterator {
 	protected int $rowIndex = 0;
 	/** @var array<int|string, string>|null The current iterator value */
 	protected ?array $currentValue = null;
+	/** @var array<int|string, scalar|null>|null */
+	private ?array $rawCurrentValue = null;
 
 	/**
 	 * DataSheet is the representation of a Worksheet
@@ -40,8 +42,8 @@ class DataSheet implements \Iterator {
 	 * @throws InvalidDataTypeException
 	 */
 	public function addRow( array $row ): void {
-		foreach( $row as &$col ) {
-			$col = $this->normalizeValue($col);
+		foreach( $row as $col ) {
+			$this->validateValue($col);
 		}
 
 		if( $this->tmpStream === null ) {
@@ -56,12 +58,10 @@ class DataSheet implements \Iterator {
 		fwrite($this->tmpStream, base64_encode(serialize($row)) . "\n");
 	}
 
-	private function normalizeValue( mixed $value ): string {
+	private function validateValue( mixed $value ): void {
 		if( !is_scalar($value) && $value !== null ) {
 			throw new InvalidDataTypeException;
 		}
-
-		return (string)$value;
 	}
 
 	/**
@@ -85,11 +85,22 @@ class DataSheet implements \Iterator {
 	}
 
 	/**
+	 * Return the current row before values are converted to strings.
+	 *
+	 * @return array<int|string, scalar|null>|null
+	 * @internal
+	 */
+	public function getRawCurrentRow(): ?array {
+		return $this->rawCurrentValue;
+	}
+
+	/**
 	 * Move forward to next element
 	 */
 	public function next(): void {
 		if( $this->tmpStream === null ) {
 			$this->currentValue = null;
+			$this->rawCurrentValue = null;
 
 			return;
 		}
@@ -98,14 +109,16 @@ class DataSheet implements \Iterator {
 
 		if( $string === false ) {
 			$this->currentValue = null;
+			$this->rawCurrentValue = null;
 		} else {
-			$this->currentValue = $this->decodeRow($string);
+			$this->rawCurrentValue = $this->decodeRow($string);
+			$this->currentValue = array_map('strval', $this->rawCurrentValue);
 			$this->rowIndex++;
 		}
 	}
 
 	/**
-	 * @return array<int|string, string>
+	 * @return array<int|string, scalar|null>
 	 */
 	private function decodeRow( string $row ): array {
 		$serializedRow = base64_decode($row, true);
@@ -118,16 +131,16 @@ class DataSheet implements \Iterator {
 			throw new \UnexpectedValueException('Unable to decode row');
 		}
 
-		$normalizedRow = [];
+		$validatedRow = [];
 		foreach( $decodedRow as $key => $value ) {
-			if( !is_string($value) ) {
-				throw new \UnexpectedValueException('Decoded row contains a non-string value');
+			if( !is_scalar($value) && $value !== null ) {
+				throw new \UnexpectedValueException('Decoded row contains a non-scalar value');
 			}
 
-			$normalizedRow[$key] = $value;
+			$validatedRow[$key] = $value;
 		}
 
-		return $normalizedRow;
+		return $validatedRow;
 	}
 
 	/**

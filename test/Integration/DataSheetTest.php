@@ -38,6 +38,20 @@ class DataSheetTest extends TestCase {
 		$this->assertNull($sheet->current());
 	}
 
+	public function test_iterationRetainsStringValues(): void {
+		$sheet = new DataSheet;
+		$sheet->addRow([ 'text' => 'hello', 'count' => 42, 'active' => true, 'empty' => null ]);
+		$this->assertNull($sheet->getRawCurrentRow());
+		$sheet->rewind();
+		$this->assertSame([ 'text' => 'hello', 'count' => 42, 'active' => true, 'empty' => null ], $sheet->getRawCurrentRow());
+		$this->assertSame([ 'text' => 'hello', 'count' => '42', 'active' => '1', 'empty' => '' ], $sheet->current());
+		$sheet->next();
+		$this->assertNull($sheet->current());
+		$this->assertNull($sheet->getRawCurrentRow());
+		$sheet->rewind();
+		$this->assertSame([ 'text' => 'hello', 'count' => '42', 'active' => '1', 'empty' => '' ], $sheet->current());
+	}
+
 	public function test_addRowRejectsNonScalarValues(): void {
 		$sheet = new DataSheet;
 		$this->expectException(InvalidDataTypeException::class);

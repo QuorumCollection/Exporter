@@ -127,15 +127,21 @@ Trigger the final export process.
 #### Method: DataSheet->__construct
 
 ```php
-function __construct(?string $name = null)
+function __construct(
+	?string $name = null,
+	\Quorum\Exporter\Engines\Csv\Encoding|string $inputEncoding = \Quorum\Exporter\Engines\Csv\Encoding::UTF8,
+)
 ```
 
-DataSheet is the representation of a Worksheet
+DataSheet represents a worksheet. String values are converted to UTF-8 when rows are added.
 
 ##### Parameters
 
 - ***string*** | ***null*** `$name` - The name to give the sheet. The use is Engine implementation specific but is likely
 filename or Sheet name
+- ***\Quorum\Exporter\Engines\Csv\Encoding*** | ***string*** `$inputEncoding` - The encoding of string values, as an enum case or an mbstring encoding name. Defaults to UTF-8.
+
+**Throws**: `\InvalidArgumentException` - If the input encoding is not supported.
 
 ---
 
@@ -155,11 +161,11 @@ Get the name of the sheet. Use thereof is Engine Specific
 function addRow(array $row): void
 ```
 
-Append a row worth of data to the end of the Worksheet.
+Append a row. String values use the configured input encoding. Array keys must be valid UTF-8. Values are converted to UTF-8 strings.
 
 ##### Parameters
 
-- ***array<int|string,scalar|null>*** `$row` - An array of scalar values or null. Values are converted to strings.
+- ***array<int|string,scalar|null>*** `$row` - An array of scalar values or null.
 
 **Throws**: `\Quorum\Exporter\Exceptions\InvalidDataTypeException`
 
@@ -251,6 +257,23 @@ enum ByteOrderMark: string {
 }
 ```
 
+### Enum: Quorum\Exporter\Engines\Csv\Encoding
+
+Character encodings supported by the CSV engine.
+
+```php
+<?php
+namespace Quorum\Exporter\Engines\Csv;
+
+enum Encoding: string {
+	case UTF8 = 'UTF-8';
+	case UTF16BE = 'UTF-16BE';
+	case UTF16LE = 'UTF-16LE';
+	case UTF32BE = 'UTF-32BE';
+	case UTF32LE = 'UTF-32LE';
+}
+```
+
 ### Enum: Quorum\Exporter\Engines\Csv\MultiSheetStrategy
 
 Strategies for exporting multiple CSV sheets.
@@ -269,31 +292,16 @@ enum MultiSheetStrategy {
 
 ### Class: Quorum\Exporter\Engines\CsvEngine
 
-```php
-<?php
-namespace Quorum\Exporter\Engines;
-
-class CsvEngine {
-	public const UTF8 = 'UTF-8';
-	public const UTF16 = 'UTF-16';
-	public const UTF16BE = 'UTF-16BE';
-	public const UTF16LE = 'UTF-16LE';
-	public const UTF32 = 'UTF-32';
-	public const UTF32BE = 'UTF-32BE';
-	public const UTF32LE = 'UTF-32LE';
-}
-```
-
 #### Method: CsvEngine->__construct
 
 ```php
 function __construct(
-	string $outputEncoding = self::UTF16LE,
+	\Quorum\Exporter\Engines\Csv\Encoding $outputEncoding = \Quorum\Exporter\Engines\Csv\Encoding::UTF16LE,
 	?string $delimiter = null,
 	string $enclosure = '"',
-	string $inputEncoding = self::UTF8,
 	?bool $bomEnabled = null,
 	\Quorum\Exporter\Engines\Csv\MultiSheetStrategy $multiSheetStrategy = \Quorum\Exporter\Engines\Csv\MultiSheetStrategy::CONCAT,
+	?string $tmpDir = null,
 )
 ```
 
@@ -307,32 +315,12 @@ While this may seem like an odd choice, the reason for this is cross platform Mi
 
 ##### Parameters
 
-- ***string*** `$outputEncoding` - The encoding to output. Defaults to UTF-16LE as it is by far the best supported by Excel
-- ***string*** | ***null*** `$delimiter` - Character to use as Delimiter. Default varies based on encoding.
-- ***string*** `$enclosure` - Character to use as Enclosure.
-- ***string*** `$inputEncoding` - The encoding of the input going into the CSVs.
+- ***\Quorum\Exporter\Engines\Csv\Encoding*** `$outputEncoding` - The encoding to output. Defaults to UTF-16LE as it is by far the best supported by Excel
+- ***string*** | ***null*** `$delimiter` - A single ASCII byte. The default varies based on encoding.
+- ***string*** `$enclosure` - A single ASCII byte used to enclose fields.
 - ***bool*** | ***null*** `$bomEnabled` - Whether to include a byte order mark. Null disables it for UTF-8 and enables it for other encodings.
 - ***\Quorum\Exporter\Engines\Csv\MultiSheetStrategy*** `$multiSheetStrategy` - How to export multiple sheets. Defaults to concatenation.
-
----
-
-#### Method: CsvEngine->setEnclosure
-
-```php
-function setEnclosure(string $enclosure): void
-```
-
-Character to use as CSV value enclosure. Commonly this will be `"`
-
----
-
-#### Method: CsvEngine->setTmpDir
-
-```php
-function setTmpDir(string $tmpDir): void
-```
-
-Set the directory to check before creating a ZIP export. Defaults to `sys_get_temp_dir`.
+- ***string*** | ***null*** `$tmpDir` - The directory to check before creating a ZIP export. Defaults to the system temporary directory.
 
 ---
 
@@ -347,18 +335,6 @@ Get the current multi-sheet strategy.
 
 ---
 
-#### Method: CsvEngine->setMultiSheetStrategy
-
-```php
-function setMultiSheetStrategy(
-	\Quorum\Exporter\Engines\Csv\MultiSheetStrategy $multiSheetStrategy,
-): void
-```
-
-Set the multi-sheet strategy. ZIP creates an archive. CONCAT writes all sheets to one CSV file.
-
----
-
 #### Method: CsvEngine->getDelimiter
 
 ```php
@@ -366,20 +342,6 @@ function getDelimiter(): string
 ```
 
 Gets delimiter.  If unset, UTF-16 and UTF-32 default to TAB "\t", everything else to COMMA ","
-
----
-
-#### Method: CsvEngine->setDelimiter
-
-```php
-function setDelimiter(?string $delimiter): void
-```
-
-Sets delimiter. Setting to NULL triggers automatic delimiter decision based on recommended encoding rules.
-
-##### Parameters
-
-- ***string*** | ***null*** `$delimiter` - Delimiter Character. Must be a single byte.
 
 ---
 
@@ -391,29 +353,17 @@ function getEnclosure(): string
 
 Get the current character used for enclosure.
 
----
-
-#### Method: CsvEngine->disableBom
-
-```php
-function disableBom(bool $disable = true): void
-```
-
-Enable or disable the leading byte order mark. By default it is disabled for UTF-8 and enabled for other encodings.
-
 ### Class: Quorum\Exporter\Engines\SpreadsheetMLEngine
 
----
-
-#### Method: SpreadsheetMLEngine->setCreatedTime
+#### Method: SpreadsheetMLEngine->__construct
 
 ```php
-function setCreatedTime(?int $createdTime): void
+function __construct(?\DateTimeInterface $createdTime = null)
 ```
 
 ##### Parameters
 
-- ***int*** | ***null*** `$createdTime` - The timestamp to use for the created time. If null or zero, the current time is used.
+- ***\DateTimeInterface*** | ***null*** `$createdTime` - The creation time. Null uses the current time when exporting.
 
 ### Class: Quorum\Exporter\Exceptions\ExportException
 

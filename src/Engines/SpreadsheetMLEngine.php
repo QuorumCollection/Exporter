@@ -12,7 +12,11 @@ class SpreadsheetMLEngine implements EngineInterface {
 
 	protected int $autoIndex = 1;
 
-	protected ?int $createdTime = null;
+	/**
+	 * @param \DateTimeInterface|null $createdTime The creation time. Null uses the current time when exporting.
+	 */
+	public function __construct( protected ?\DateTimeInterface $createdTime = null ) {
+	}
 
 	public function processSheet( DataSheet $sheet ): void {
 		$outputStream = fopen("php://temp", "r+");
@@ -121,7 +125,8 @@ class SpreadsheetMLEngine implements EngineInterface {
 
 		$documentProperties = $doc->createElement('DocumentProperties');
 		$documentProperties->setAttribute('xmlns', 'urn:schemas-microsoft-com:office:office');
-		$documentProperties->appendChild($doc->createElement('Created', date('c', $this->createdTime ?: time())));
+		$createdTime = ($this->createdTime ?? new \DateTimeImmutable)->format(DATE_ATOM);
+		$documentProperties->appendChild($doc->createElement('Created', $createdTime));
 		$workbook->appendChild($documentProperties);
 
 		$styles = $doc->createElement('Styles');
@@ -182,13 +187,6 @@ class SpreadsheetMLEngine implements EngineInterface {
 		}
 
 		return $xml;
-	}
-
-	/**
-	 * @param int|null $createdTime The timestamp to use for the created time. If null or zero, the current time is used.
-	 */
-	public function setCreatedTime( ?int $createdTime ): void {
-		$this->createdTime = $createdTime;
 	}
 
 }

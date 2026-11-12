@@ -125,6 +125,11 @@ class CsvEngine implements EngineInterface {
 			}
 
 			$line = mb_convert_encoding($line, $outputEncoding->value, 'UTF-8');
+			// @phpstan-ignore identical.alwaysFalse (Handle the documented failure return.)
+			if( $line === false ) {
+				throw new ExportException('Unable to convert CSV data');
+			}
+
 			fputs($outputStream, $line);
 		}
 

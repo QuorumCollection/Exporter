@@ -99,12 +99,6 @@ class CsvEngine implements EngineInterface {
 			throw new OutputException('Unable to open temporary output stream');
 		}
 
-		$outputEncoding = match( $this->outputEncoding ) {
-			Encoding::UTF16 => $this->isLittleEndian() ? Encoding::UTF16LE : Encoding::UTF16BE,
-			Encoding::UTF32 => $this->isLittleEndian() ? Encoding::UTF32LE : Encoding::UTF32BE,
-			default         => $this->outputEncoding,
-		};
-
 		foreach( $sheet as $data ) {
 			$mem = fopen('php://memory', 'w+');
 			if( $mem === false ) {
@@ -124,7 +118,7 @@ class CsvEngine implements EngineInterface {
 				throw new ExportException('Unable to read CSV data');
 			}
 
-			$line = mb_convert_encoding($line, $outputEncoding->value, 'UTF-8');
+			$line = mb_convert_encoding($line, $this->outputEncoding->value, 'UTF-8');
 			// @phpstan-ignore identical.alwaysFalse (Handle the documented failure return.)
 			if( $line === false ) {
 				throw new ExportException('Unable to convert CSV data');
@@ -193,11 +187,10 @@ class CsvEngine implements EngineInterface {
 	 */
 	public function getDelimiter(): string {
 		if( $this->delimiter === null ) {
-			if( str_starts_with($this->outputEncoding->value, Encoding::UTF16->value) || str_starts_with($this->outputEncoding->value, Encoding::UTF32->value) ) {
-				return "\t";
-			}
-
-			return ",";
+			return match( $this->outputEncoding ) {
+				Encoding::UTF8 => ',',
+				Encoding::UTF16BE, Encoding::UTF16LE, Encoding::UTF32BE, Encoding::UTF32LE => "\t",
+			};
 		}
 
 		return $this->delimiter;
@@ -230,19 +223,13 @@ class CsvEngine implements EngineInterface {
 
 		$bom = match( $this->outputEncoding ) {
 			Encoding::UTF8    => ByteOrderMark::UTF8,
-			Encoding::UTF16   => $this->isLittleEndian() ? ByteOrderMark::UTF16LE : ByteOrderMark::UTF16BE,
 			Encoding::UTF16BE => ByteOrderMark::UTF16BE,
 			Encoding::UTF16LE => ByteOrderMark::UTF16LE,
-			Encoding::UTF32   => $this->isLittleEndian() ? ByteOrderMark::UTF32LE : ByteOrderMark::UTF32BE,
 			Encoding::UTF32BE => ByteOrderMark::UTF32BE,
 			Encoding::UTF32LE => ByteOrderMark::UTF32LE,
 		};
 
 		return $bom->value;
-	}
-
-	final protected function isLittleEndian(): bool {
-		return unpack('S', "\x01\x00") === [ 1 => 1 ];
 	}
 
 	/**

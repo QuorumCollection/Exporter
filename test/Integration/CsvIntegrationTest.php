@@ -41,34 +41,6 @@ class CsvIntegrationTest extends TestCase {
 		];
 	}
 
-	#[\PHPUnit\Framework\Attributes\DataProvider('genericEncodingProvider')]
-	public function test_genericEncoding( Encoding $encoding, string $littleEndianBom, string $bigEndianBom ): void {
-		$engine = new CsvEngine(outputEncoding: $encoding);
-		$this->assertSame("\t", $engine->getDelimiter());
-		$export = new DataExport($engine);
-		$sheet = new DataSheet;
-		$sheet->addRow([ 'hello' ]);
-		$sheet->addRow([ 'world' ]);
-		$export->addSheet($sheet);
-		$stream = fopen('php://temp', 'r+');
-		$this->assertIsResource($stream);
-		$export->export($stream);
-		rewind($stream);
-		$output = stream_get_contents($stream);
-		$this->assertIsString($output);
-		$bom = unpack('S', "\x01\x00") === [ 1 => 1 ] ? $littleEndianBom : $bigEndianBom;
-		$this->assertStringStartsWith($bom, $output);
-		$this->assertSame("hello\nworld\n", mb_convert_encoding($output, 'UTF-8', $encoding->value));
-		fclose($stream);
-	}
-
-	public static function genericEncodingProvider(): array {
-		return [
-			[ Encoding::UTF16, "\xFF\xFE", "\xFE\xFF" ],
-			[ Encoding::UTF32, "\xFF\xFE\0\0", "\0\0\xFE\xFF" ],
-		];
-	}
-
 	#[\PHPUnit\Framework\Attributes\DataProvider('disabledBomEncodingProvider')]
 	public function test_disableBom( Encoding $encoding, string $expectedEncoding ): void {
 		$engine = new CsvEngine($encoding);
@@ -86,13 +58,12 @@ class CsvIntegrationTest extends TestCase {
 	}
 
 	public static function disabledBomEncodingProvider(): array {
-		$littleEndian = unpack('S', "\x01\x00") === [ 1 => 1 ];
-
 		return [
 			[ Encoding::UTF8, 'UTF-8' ],
-			[ Encoding::UTF16, $littleEndian ? 'UTF-16LE' : 'UTF-16BE' ],
+			[ Encoding::UTF16BE, 'UTF-16BE' ],
 			[ Encoding::UTF16LE, 'UTF-16LE' ],
-			[ Encoding::UTF32, $littleEndian ? 'UTF-32LE' : 'UTF-32BE' ],
+			[ Encoding::UTF32BE, 'UTF-32BE' ],
+			[ Encoding::UTF32LE, 'UTF-32LE' ],
 		];
 	}
 

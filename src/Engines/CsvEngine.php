@@ -42,6 +42,7 @@ class CsvEngine implements EngineInterface {
 	 * @param string             $enclosure          A single ASCII byte used to enclose fields.
 	 * @param bool|null          $bomEnabled         Whether to include a byte order mark. Null disables it for UTF-8 and enables it for other encodings.
 	 * @param MultiSheetStrategy $multiSheetStrategy How to export multiple sheets. Defaults to concatenation.
+	 * @param string|null        $tmpDir             The directory to check before creating a ZIP export. Defaults to the system temporary directory.
 	 */
 	public function __construct(
 		Encoding $outputEncoding = Encoding::UTF16LE,
@@ -49,33 +50,21 @@ class CsvEngine implements EngineInterface {
 		string $enclosure = '"',
 		?bool $bomEnabled = null,
 		MultiSheetStrategy $multiSheetStrategy = MultiSheetStrategy::CONCAT,
+		?string $tmpDir = null,
 	) {
-		$this->setDelimiter($delimiter);
-		$this->setEnclosure($enclosure);
-		$this->setOutputEncoding($outputEncoding);
-		$this->disableBom = !($bomEnabled ?? ($outputEncoding !== Encoding::UTF8));
-		$this->multiSheetStrategy = $multiSheetStrategy;
-	}
+		if( $delimiter !== null && (strlen($delimiter) !== 1 || ord($delimiter) > 0x7F) ) {
+			throw new \InvalidArgumentException('Delimiter must be a single ASCII byte');
+		}
 
-	/**
-	 * Character to use as CSV value enclosure. Commonly this will be `"`
-	 */
-	public function setEnclosure( string $enclosure ): void {
 		if( strlen($enclosure) !== 1 || ord($enclosure) > 0x7F ) {
 			throw new \InvalidArgumentException('Enclosure must be a single ASCII byte');
 		}
 
+		$this->delimiter = $delimiter;
 		$this->enclosure = $enclosure;
-	}
-
-	protected function setOutputEncoding( Encoding $outputEncoding ): void {
 		$this->outputEncoding = $outputEncoding;
-	}
-
-	/**
-	 * Set the directory to check before creating a ZIP export. Defaults to `sys_get_temp_dir`.
-	 */
-	public function setTmpDir( string $tmpDir ): void {
+		$this->disableBom = !($bomEnabled ?? ($outputEncoding !== Encoding::UTF8));
+		$this->multiSheetStrategy = $multiSheetStrategy;
 		$this->tmpDir = $tmpDir;
 	}
 
@@ -84,13 +73,6 @@ class CsvEngine implements EngineInterface {
 	 */
 	public function getMultiSheetStrategy(): MultiSheetStrategy {
 		return $this->multiSheetStrategy;
-	}
-
-	/**
-	 * Set the multi-sheet strategy. ZIP creates an archive. CONCAT writes all sheets to one CSV file.
-	 */
-	public function setMultiSheetStrategy( MultiSheetStrategy $multiSheetStrategy ): void {
-		$this->multiSheetStrategy = $multiSheetStrategy;
 	}
 
 	public function processSheet( DataSheet $sheet ): void {
@@ -197,19 +179,6 @@ class CsvEngine implements EngineInterface {
 	}
 
 	/**
-	 * Sets delimiter. Setting to NULL triggers automatic delimiter decision based on recommended encoding rules.
-	 *
-	 * @param string|null $delimiter Delimiter character. Must be a single ASCII byte.
-	 */
-	public function setDelimiter( ?string $delimiter ): void {
-		if( $delimiter !== null && (strlen($delimiter) !== 1 || ord($delimiter) > 0x7F) ) {
-			throw new \InvalidArgumentException('Delimiter must be a single ASCII byte');
-		}
-
-		$this->delimiter = $delimiter;
-	}
-
-	/**
 	 * Get the current character used for enclosure.
 	 */
 	public function getEnclosure(): string {
@@ -230,13 +199,6 @@ class CsvEngine implements EngineInterface {
 		};
 
 		return $bom->value;
-	}
-
-	/**
-	 * Enable or disable the leading byte order mark. By default it is disabled for UTF-8 and enabled for other encodings.
-	 */
-	public function disableBom( bool $disable = true ): void {
-		$this->disableBom = $disable;
 	}
 
 }

@@ -41,22 +41,6 @@ class CsvIntegrationTest extends TestCase {
 		];
 	}
 
-	#[\PHPUnit\Framework\Attributes\DataProvider('disabledBomEncodingProvider')]
-	public function test_disableBom( Encoding $encoding, string $expectedEncoding ): void {
-		$engine = new CsvEngine($encoding);
-		$engine->disableBom();
-		$export = new DataExport($engine);
-		$sheet = new DataSheet;
-		$sheet->addRow([ 'hello' ]);
-		$export->addSheet($sheet);
-		$stream = fopen('php://temp', 'r+');
-		$this->assertIsResource($stream);
-		$export->export($stream);
-		rewind($stream);
-		$this->assertSame(mb_convert_encoding("hello\n", $expectedEncoding, 'UTF-8'), stream_get_contents($stream));
-		fclose($stream);
-	}
-
 	public static function disabledBomEncodingProvider(): array {
 		return [
 			[ Encoding::UTF8, 'UTF-8' ],
@@ -176,8 +160,24 @@ class CsvIntegrationTest extends TestCase {
 		new CsvEngine(outputEncoding: Encoding::UTF8, enclosure: "\xA7");
 	}
 
+	public function test_customDelimiterAndEnclosure(): void {
+		$engine = new CsvEngine(Encoding::UTF8, delimiter: ';', enclosure: "'");
+		$this->assertSame(';', $engine->getDelimiter());
+		$this->assertSame("'", $engine->getEnclosure());
+		$export = new DataExport($engine);
+		$sheet = new DataSheet;
+		$sheet->addRow([ 'one;two', 'three' ]);
+		$export->addSheet($sheet);
+		$stream = fopen('php://temp', 'r+');
+		$this->assertIsResource($stream);
+		$export->export($stream);
+		rewind($stream);
+		$this->assertSame("'one;two';three\n", stream_get_contents($stream));
+		fclose($stream);
+	}
+
 	public function test_zipExportContainsNamedSheets(): void {
-		$engine = new CsvEngine(Encoding::UTF8, multiSheetStrategy: MultiSheetStrategy::ZIP);
+		$engine = new CsvEngine(Encoding::UTF8, multiSheetStrategy: MultiSheetStrategy::ZIP, tmpDir: sys_get_temp_dir());
 		$export = new DataExport($engine);
 		$first = new DataSheet('first');
 		$first->addRow([ 'one', '日本語' ]);
@@ -203,15 +203,29 @@ class CsvIntegrationTest extends TestCase {
 	public function test_strategyUsesEnumCases(): void {
 		$engine = new CsvEngine(Encoding::UTF8);
 		$this->assertSame(MultiSheetStrategy::CONCAT, $engine->getMultiSheetStrategy());
-		$engine->setMultiSheetStrategy(MultiSheetStrategy::ZIP);
+		$engine = new CsvEngine(Encoding::UTF8, multiSheetStrategy: MultiSheetStrategy::ZIP);
 		$this->assertSame(MultiSheetStrategy::ZIP, $engine->getMultiSheetStrategy());
-		$engine->setMultiSheetStrategy(MultiSheetStrategy::CONCAT);
-		$this->assertSame(MultiSheetStrategy::CONCAT, $engine->getMultiSheetStrategy());
+	}
+
+	public function test_invalidTemporaryDirectory(): void {
+		$engine = new CsvEngine(Encoding::UTF8, multiSheetStrategy: MultiSheetStrategy::ZIP, tmpDir: __FILE__);
+		$export = new DataExport($engine);
+		$sheet = new DataSheet;
+		$sheet->addRow([ 'one' ]);
+		$export->addSheet($sheet);
+		$stream = fopen('php://temp', 'r+');
+		$this->assertIsResource($stream);
+
+		try {
+			$this->expectException(\RuntimeException::class);
+			$export->export($stream);
+		}finally{
+			fclose($stream);
+		}
 	}
 
 	public function test_concatStrategyExportsBothSheets(): void {
 		$engine = new CsvEngine(Encoding::UTF8);
-		$engine->setMultiSheetStrategy(MultiSheetStrategy::CONCAT);
 		$export = new DataExport($engine);
 		$first = new DataSheet('first');
 		$first->addRow([ 'one' ]);

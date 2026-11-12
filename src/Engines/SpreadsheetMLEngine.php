@@ -12,7 +12,11 @@ class SpreadsheetMLEngine implements EngineInterface {
 
 	protected int $autoIndex = 1;
 
-	protected ?int $createdTime = null;
+	/**
+	 * @param int|null $createdTime The creation timestamp. Null or zero uses the current time.
+	 */
+	public function __construct( protected ?int $createdTime = null ) {
+	}
 
 	public function processSheet( DataSheet $sheet ): void {
 		$outputStream = fopen("php://temp", "r+");
@@ -182,13 +186,6 @@ class SpreadsheetMLEngine implements EngineInterface {
 		}
 
 		return $xml;
-	}
-
-	/**
-	 * @param int|null $createdTime The timestamp to use for the created time. If null or zero, the current time is used.
-	 */
-	public function setCreatedTime( ?int $createdTime ): void {
-		$this->createdTime = $createdTime;
 	}
 
 }

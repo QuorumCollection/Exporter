@@ -301,6 +301,7 @@ function __construct(
 	string $enclosure = '"',
 	?bool $bomEnabled = null,
 	\Quorum\Exporter\Engines\Csv\MultiSheetStrategy $multiSheetStrategy = \Quorum\Exporter\Engines\Csv\MultiSheetStrategy::CONCAT,
+	?string $tmpDir = null,
 )
 ```
 
@@ -319,26 +320,7 @@ While this may seem like an odd choice, the reason for this is cross platform Mi
 - ***string*** `$enclosure` - A single ASCII byte used to enclose fields.
 - ***bool*** | ***null*** `$bomEnabled` - Whether to include a byte order mark. Null disables it for UTF-8 and enables it for other encodings.
 - ***\Quorum\Exporter\Engines\Csv\MultiSheetStrategy*** `$multiSheetStrategy` - How to export multiple sheets. Defaults to concatenation.
-
----
-
-#### Method: CsvEngine->setEnclosure
-
-```php
-function setEnclosure(string $enclosure): void
-```
-
-Character to use as CSV value enclosure. Commonly this will be `"`
-
----
-
-#### Method: CsvEngine->setTmpDir
-
-```php
-function setTmpDir(string $tmpDir): void
-```
-
-Set the directory to check before creating a ZIP export. Defaults to `sys_get_temp_dir`.
+- ***string*** | ***null*** `$tmpDir` - The directory to check before creating a ZIP export. Defaults to the system temporary directory.
 
 ---
 
@@ -353,18 +335,6 @@ Get the current multi-sheet strategy.
 
 ---
 
-#### Method: CsvEngine->setMultiSheetStrategy
-
-```php
-function setMultiSheetStrategy(
-	\Quorum\Exporter\Engines\Csv\MultiSheetStrategy $multiSheetStrategy,
-): void
-```
-
-Set the multi-sheet strategy. ZIP creates an archive. CONCAT writes all sheets to one CSV file.
-
----
-
 #### Method: CsvEngine->getDelimiter
 
 ```php
@@ -372,20 +342,6 @@ function getDelimiter(): string
 ```
 
 Gets delimiter.  If unset, UTF-16 and UTF-32 default to TAB "\t", everything else to COMMA ","
-
----
-
-#### Method: CsvEngine->setDelimiter
-
-```php
-function setDelimiter(?string $delimiter): void
-```
-
-Sets delimiter. Setting to NULL triggers automatic delimiter decision based on recommended encoding rules.
-
-##### Parameters
-
-- ***string*** | ***null*** `$delimiter` - Delimiter character. Must be a single ASCII byte.
 
 ---
 
@@ -397,29 +353,17 @@ function getEnclosure(): string
 
 Get the current character used for enclosure.
 
----
-
-#### Method: CsvEngine->disableBom
-
-```php
-function disableBom(bool $disable = true): void
-```
-
-Enable or disable the leading byte order mark. By default it is disabled for UTF-8 and enabled for other encodings.
-
 ### Class: Quorum\Exporter\Engines\SpreadsheetMLEngine
 
----
-
-#### Method: SpreadsheetMLEngine->setCreatedTime
+#### Method: SpreadsheetMLEngine->__construct
 
 ```php
-function setCreatedTime(?int $createdTime): void
+function __construct(?int $createdTime = null)
 ```
 
 ##### Parameters
 
-- ***int*** | ***null*** `$createdTime` - The timestamp to use for the created time. If null or zero, the current time is used.
+- ***int*** | ***null*** `$createdTime` - The creation timestamp. Null or zero uses the current time.
 
 ### Class: Quorum\Exporter\Exceptions\ExportException
 

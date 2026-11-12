@@ -358,12 +358,12 @@ Get the current character used for enclosure.
 #### Method: SpreadsheetMLEngine->__construct
 
 ```php
-function __construct(?int $createdTime = null)
+function __construct(?\DateTimeInterface $createdTime = null)
 ```
 
 ##### Parameters
 
-- ***int*** | ***null*** `$createdTime` - The creation timestamp. Null or zero uses the current time.
+- ***\DateTimeInterface*** | ***null*** `$createdTime` - The creation time. Null uses the current time when exporting.
 
 ### Class: Quorum\Exporter\Exceptions\ExportException
 

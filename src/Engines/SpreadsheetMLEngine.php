@@ -13,9 +13,9 @@ class SpreadsheetMLEngine implements EngineInterface {
 	protected int $autoIndex = 1;
 
 	/**
-	 * @param int|null $createdTime The creation timestamp. Null or zero uses the current time.
+	 * @param \DateTimeInterface|null $createdTime The creation time. Null uses the current time when exporting.
 	 */
-	public function __construct( protected ?int $createdTime = null ) {
+	public function __construct( protected ?\DateTimeInterface $createdTime = null ) {
 	}
 
 	public function processSheet( DataSheet $sheet ): void {
@@ -125,7 +125,8 @@ class SpreadsheetMLEngine implements EngineInterface {
 
 		$documentProperties = $doc->createElement('DocumentProperties');
 		$documentProperties->setAttribute('xmlns', 'urn:schemas-microsoft-com:office:office');
-		$documentProperties->appendChild($doc->createElement('Created', date('c', $this->createdTime ?: time())));
+		$createdTime = ($this->createdTime ?? new \DateTimeImmutable)->format(DATE_ATOM);
+		$documentProperties->appendChild($doc->createElement('Created', $createdTime));
 		$workbook->appendChild($documentProperties);
 
 		$styles = $doc->createElement('Styles');

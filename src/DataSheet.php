@@ -2,6 +2,7 @@
 
 namespace Quorum\Exporter;
 
+use Quorum\Exporter\Engines\Csv\Encoding;
 use Quorum\Exporter\Exceptions\InvalidDataTypeException;
 
 /**
@@ -16,14 +17,23 @@ class DataSheet implements \Iterator {
 	protected int $rowIndex = 0;
 	/** @var array<int|string, string>|null The current iterator value */
 	protected ?array $currentValue = null;
+	private string $inputEncoding;
 
 	/**
-	 * DataSheet is the representation of a Worksheet
+	 * DataSheet represents a worksheet. String values are converted to UTF-8 when rows are added.
 	 *
-	 * @param string|null $name The name to give the sheet. The use is Engine implementation specific but is likely
-	 *                          filename or Sheet name
+	 * @param string|null     $name          The name to give the sheet. The use is Engine implementation specific but is likely
+	 *                                       filename or Sheet name
+	 * @param Encoding|string $inputEncoding The encoding of string values, as an enum case or an mbstring encoding name. Defaults to UTF-8.
+	 * @throws \InvalidArgumentException If the input encoding is not supported.
 	 */
-	public function __construct( protected ?string $name = null ) {
+	public function __construct( protected ?string $name = null, Encoding|string $inputEncoding = Encoding::UTF8 ) {
+		$inputEncoding = $inputEncoding instanceof Encoding ? $inputEncoding->value : $inputEncoding;
+		if( !in_array($inputEncoding, mb_list_encodings(), true) ) {
+			throw new \InvalidArgumentException('Invalid Encoding');
+		}
+
+		$this->inputEncoding = $inputEncoding;
 	}
 
 	/**
@@ -34,9 +44,9 @@ class DataSheet implements \Iterator {
 	}
 
 	/**
-	 * Append a row worth of data to the end of the Worksheet.
+	 * Append a row. String values use the configured input encoding. Array keys must be valid UTF-8. Values are converted to UTF-8 strings.
 	 *
-	 * @param array<int|string, scalar|null> $row An array of scalar values or null. Values are converted to strings.
+	 * @param array<int|string, scalar|null> $row An array of scalar values or null.
 	 * @throws InvalidDataTypeException
 	 */
 	public function addRow( array $row ): void {
@@ -64,6 +74,15 @@ class DataSheet implements \Iterator {
 	private function normalizeValue( mixed $value ): string {
 		if( !is_scalar($value) && $value !== null ) {
 			throw new InvalidDataTypeException;
+		}
+
+		if( is_string($value) && $this->inputEncoding !== 'UTF-8' ) {
+			$converted = mb_convert_encoding($value, 'UTF-8', $this->inputEncoding);
+			if( $converted === false ) {
+				throw new InvalidDataTypeException('Unable to convert row value');
+			}
+
+			return $converted;
 		}
 
 		return (string)$value;

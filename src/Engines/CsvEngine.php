@@ -5,6 +5,7 @@ namespace Quorum\Exporter\Engines;
 use Quorum\Exporter\DataSheet;
 use Quorum\Exporter\EngineInterface;
 use Quorum\Exporter\Engines\Csv\ByteOrderMark;
+use Quorum\Exporter\Engines\Csv\Encoding;
 use Quorum\Exporter\Engines\Csv\MultiSheetStrategy;
 use Quorum\Exporter\Exceptions\ExportException;
 use Quorum\Exporter\Exceptions\OutputException;
@@ -13,22 +14,10 @@ use ZipStream\ZipStream;
 
 class CsvEngine implements EngineInterface {
 
-	public const UTF8 = 'UTF-8';
-
-	public const UTF16   = 'UTF-16';
-	public const UTF16BE = 'UTF-16BE';
-	public const UTF16LE = 'UTF-16LE';
-
-	public const UTF32   = 'UTF-32';
-	public const UTF32BE = 'UTF-32BE';
-	public const UTF32LE = 'UTF-32LE';
-
 	/** @var array<int|string, resource> */
 	protected array $streams = [];
 
-	protected string $outputEncoding;
-	protected string $inputEncoding;
-
+	protected Encoding $outputEncoding;
 	protected ?string $delimiter;
 	protected string $enclosure;
 
@@ -48,62 +37,34 @@ class CsvEngine implements EngineInterface {
 	 *
 	 * - https://donatstudios.com/CSV-An-Encoding-Nightmare
 	 *
-	 * @see http://php.net/manual/en/function.mb-list-encodings.php for list of encoding strings.
-	 *
-	 * @param string             $outputEncoding     The encoding to output. Defaults to UTF-16LE as it is by far the best supported by Excel
-	 * @param string|null        $delimiter          Character to use as Delimiter. Default varies based on encoding.
-	 * @param string             $enclosure          Character to use as Enclosure.
-	 * @param string             $inputEncoding      The encoding of the input going into the CSVs.
+	 * @param Encoding           $outputEncoding     The encoding to output. Defaults to UTF-16LE as it is by far the best supported by Excel
+	 * @param string|null        $delimiter          A single ASCII byte. The default varies based on encoding.
+	 * @param string             $enclosure          A single ASCII byte used to enclose fields.
 	 * @param bool|null          $bomEnabled         Whether to include a byte order mark. Null disables it for UTF-8 and enables it for other encodings.
 	 * @param MultiSheetStrategy $multiSheetStrategy How to export multiple sheets. Defaults to concatenation.
+	 * @param string|null        $tmpDir             The directory to check before creating a ZIP export. Defaults to the system temporary directory.
 	 */
 	public function __construct(
-		string $outputEncoding = self::UTF16LE,
+		Encoding $outputEncoding = Encoding::UTF16LE,
 		?string $delimiter = null,
 		string $enclosure = '"',
-		string $inputEncoding = self::UTF8,
 		?bool $bomEnabled = null,
 		MultiSheetStrategy $multiSheetStrategy = MultiSheetStrategy::CONCAT,
+		?string $tmpDir = null,
 	) {
-		$this->setDelimiter($delimiter);
-		$this->setEnclosure($enclosure);
-		$this->setOutputEncoding($outputEncoding);
-		$this->setInputEncoding($inputEncoding);
-		$this->disableBom = !($bomEnabled ?? ($outputEncoding !== self::UTF8));
-		$this->multiSheetStrategy = $multiSheetStrategy;
-	}
-
-	/**
-	 * Character to use as CSV value enclosure. Commonly this will be `"`
-	 */
-	public function setEnclosure( string $enclosure ): void {
-		if( strlen($enclosure) !== 1 ) {
-			throw new \InvalidArgumentException('Enclosure must be exactly one byte');
+		if( $delimiter !== null && (strlen($delimiter) !== 1 || ord($delimiter) > 0x7F) ) {
+			throw new \InvalidArgumentException('Delimiter must be a single ASCII byte');
 		}
 
+		if( strlen($enclosure) !== 1 || ord($enclosure) > 0x7F ) {
+			throw new \InvalidArgumentException('Enclosure must be a single ASCII byte');
+		}
+
+		$this->delimiter = $delimiter;
 		$this->enclosure = $enclosure;
-	}
-
-	protected function setOutputEncoding( string $outputEncoding ): void {
-		if( !in_array($outputEncoding, mb_list_encodings(), true) ) {
-			throw new \InvalidArgumentException('Invalid Encoding');
-		}
-
 		$this->outputEncoding = $outputEncoding;
-	}
-
-	protected function setInputEncoding( string $inputEncoding ): void {
-		if( !in_array($inputEncoding, mb_list_encodings()) ) {
-			throw new \InvalidArgumentException('Invalid Encoding');
-		}
-
-		$this->inputEncoding = $inputEncoding;
-	}
-
-	/**
-	 * Set the directory to check before creating a ZIP export. Defaults to `sys_get_temp_dir`.
-	 */
-	public function setTmpDir( string $tmpDir ): void {
+		$this->disableBom = !($bomEnabled ?? ($outputEncoding !== Encoding::UTF8));
+		$this->multiSheetStrategy = $multiSheetStrategy;
 		$this->tmpDir = $tmpDir;
 	}
 
@@ -114,24 +75,11 @@ class CsvEngine implements EngineInterface {
 		return $this->multiSheetStrategy;
 	}
 
-	/**
-	 * Set the multi-sheet strategy. ZIP creates an archive. CONCAT writes all sheets to one CSV file.
-	 */
-	public function setMultiSheetStrategy( MultiSheetStrategy $multiSheetStrategy ): void {
-		$this->multiSheetStrategy = $multiSheetStrategy;
-	}
-
 	public function processSheet( DataSheet $sheet ): void {
 		$outputStream = fopen("php://temp", "r+");
 		if( $outputStream === false ) {
 			throw new OutputException('Unable to open temporary output stream');
 		}
-
-		$outputEncoding = match( $this->outputEncoding ) {
-			self::UTF16 => $this->isLittleEndian() ? self::UTF16LE : self::UTF16BE,
-			self::UTF32 => $this->isLittleEndian() ? self::UTF32LE : self::UTF32BE,
-			default     => $this->outputEncoding,
-		};
 
 		foreach( $sheet as $data ) {
 			$mem = fopen('php://memory', 'w+');
@@ -152,7 +100,8 @@ class CsvEngine implements EngineInterface {
 				throw new ExportException('Unable to read CSV data');
 			}
 
-			$line = mb_convert_encoding($line, $outputEncoding, $this->inputEncoding);
+			$line = mb_convert_encoding($line, $this->outputEncoding->value, 'UTF-8');
+			// @phpstan-ignore identical.alwaysFalse (Handle the documented failure return.)
 			if( $line === false ) {
 				throw new ExportException('Unable to convert CSV data');
 			}
@@ -220,27 +169,13 @@ class CsvEngine implements EngineInterface {
 	 */
 	public function getDelimiter(): string {
 		if( $this->delimiter === null ) {
-			if( stripos($this->outputEncoding, self::UTF16) === 0 || stripos($this->outputEncoding, self::UTF32) === 0 ) {
-				return "\t";
-			}
-
-			return ",";
+			return match( $this->outputEncoding ) {
+				Encoding::UTF8 => ',',
+				Encoding::UTF16BE, Encoding::UTF16LE, Encoding::UTF32BE, Encoding::UTF32LE => "\t",
+			};
 		}
 
 		return $this->delimiter;
-	}
-
-	/**
-	 * Sets delimiter. Setting to NULL triggers automatic delimiter decision based on recommended encoding rules.
-	 *
-	 * @param string|null $delimiter Delimiter Character. Must be a single byte.
-	 */
-	public function setDelimiter( ?string $delimiter ): void {
-		if( $delimiter !== null && strlen($delimiter) !== 1 ) {
-			throw new \InvalidArgumentException('Delimiter must be exactly one byte');
-		}
-
-		$this->delimiter = $delimiter;
 	}
 
 	/**
@@ -256,28 +191,14 @@ class CsvEngine implements EngineInterface {
 		}
 
 		$bom = match( $this->outputEncoding ) {
-			self::UTF8    => ByteOrderMark::UTF8,
-			self::UTF16   => $this->isLittleEndian() ? ByteOrderMark::UTF16LE : ByteOrderMark::UTF16BE,
-			self::UTF16BE => ByteOrderMark::UTF16BE,
-			self::UTF16LE => ByteOrderMark::UTF16LE,
-			self::UTF32   => $this->isLittleEndian() ? ByteOrderMark::UTF32LE : ByteOrderMark::UTF32BE,
-			self::UTF32BE => ByteOrderMark::UTF32BE,
-			self::UTF32LE => ByteOrderMark::UTF32LE,
-			default       => null,
+			Encoding::UTF8    => ByteOrderMark::UTF8,
+			Encoding::UTF16BE => ByteOrderMark::UTF16BE,
+			Encoding::UTF16LE => ByteOrderMark::UTF16LE,
+			Encoding::UTF32BE => ByteOrderMark::UTF32BE,
+			Encoding::UTF32LE => ByteOrderMark::UTF32LE,
 		};
 
-		return $bom === null ? '' : $bom->value;
-	}
-
-	final protected function isLittleEndian(): bool {
-		return unpack('S', "\x01\x00") === [ 1 => 1 ];
-	}
-
-	/**
-	 * Enable or disable the leading byte order mark. By default it is disabled for UTF-8 and enabled for other encodings.
-	 */
-	public function disableBom( bool $disable = true ): void {
-		$this->disableBom = $disable;
+		return $bom->value;
 	}
 
 }
